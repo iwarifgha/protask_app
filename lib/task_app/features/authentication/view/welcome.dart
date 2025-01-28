@@ -24,7 +24,8 @@ class WelcomeView extends StatelessWidget {
             ),
             ElevatedButton(
                 onPressed: () {
-                  state.setOnboardedState(); //auto redirect moves you to the sign in view automatically.
+                  state.setOnboardedState();
+                  context.go(SignInView.path);
                 },
                 child: const Text(' Get Started ')),
           ],

@@ -35,10 +35,14 @@ class ProjectsServiceProvider {
     }
   }
 
-  Future<List<Project>> fetchProjects(String userId) async {
+  Future<List<Project>> fetchProjects() async {
     try {
+      final user = await _firebaseAuthProvider.getAuthState();
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
       final projects =
-          await _fireStoreDatabaseServiceProvider.fetchProjects(userId);
+          await _fireStoreDatabaseServiceProvider.fetchProjects(user.uid);
       return projects;
     } catch (e) {
       throw Exception(e.toString());

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 //import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/controller/state/auth_state_provider.dart';
+import 'package:task_app/task_app/features/projects/view/projects_view.dart';
 
 class SignInView extends StatefulWidget {
   static String path = '/sign_in';
@@ -16,9 +18,12 @@ class _SignInViewState extends State<SignInView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  _login(BuildContext context) async {
+  _login() async {
+    final state = context.read<AuthStateProvider>();
+    final router = GoRouter.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
             elevation: 0,
             backgroundColor: Colors.transparent,
@@ -29,16 +34,16 @@ class _SignInViewState extends State<SignInView> {
                   decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(12)),
-                  child: Text('empty field')),
+                  child: Center(child: Text('empty field'))),
             )),
       );
       return;
     } else {
-      final signedIn = await context.read<AuthStateProvider>().signIn(
+      final signedIn = await state.signIn(
           email: _emailController.text, password: _passwordController.text);
-
       if (signedIn == true) {
-        context.read<AuthStateProvider>().setSignedInState();
+        await state.setSignedInStateAsTrue();
+        router.go(ProjectsView.path);
       }
       return;
     }
@@ -66,7 +71,7 @@ class _SignInViewState extends State<SignInView> {
               obscureText: true,
             ),
             ElevatedButton(
-                onPressed: () => _login(context), child: const Text('Sign In')),
+                onPressed: () => _login(), child: const Text('Sign In')),
             if (state.isLoading == true)
               CircularProgressIndicator(
                 color: Colors.black,

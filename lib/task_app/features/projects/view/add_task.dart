@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../authentication/controller/service/auth_service.dart';
+import '../../authentication/controller/service/auth_service_provider.dart';
 import '../controller/state/projects_state_provider.dart';
 
 // class AddTaskView extends StatefulWidget {

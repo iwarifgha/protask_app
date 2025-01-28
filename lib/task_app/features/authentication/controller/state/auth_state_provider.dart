@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:task_app/task_app/features/authentication/controller/service/auth_service.dart';
+import 'package:task_app/task_app/features/authentication/controller/service/auth_service_provider.dart';
 import 'package:task_app/task_app/features/profile/common/pref/user_pref.dart';
+import 'package:task_app/task_app/features/profile/model/user_model.dart';
 
 class AuthStateProvider extends ChangeNotifier {
   final _userPreferences = UserPreferences();
@@ -26,8 +27,14 @@ class AuthStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setSignedInState() async {
-    final signInState = await _userPreferences.setSignedInState();
+  Future<void> setSignedInStateAsTrue() async {
+    final signInState = await _userPreferences.setSignedInStateAsTrue();
+    _isSignedIn = signInState;
+    notifyListeners();
+  }
+
+  Future<void> setSignedInStateAsFalse() async {
+    final signInState = await _userPreferences.setSignedInStateAsFalse();
     _isSignedIn = signInState;
     notifyListeners();
   }
@@ -38,19 +45,28 @@ class AuthStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<UserProfile> getAuthState() async {
+    try {
+      final user = await _authServiceProvider.getAuthState();
+      if (user == null) {
+        throw Exception('no user found');
+      }
+      return UserProfile(
+          userId: user.uid,
+          displayName: user.displayName!,
+          email: user.email!,
+          joined: user.metadata.creationTime.toString());
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
   Future<bool> signIn({required String email, required String password}) async {
     _setLoading(true);
     try {
-      await Future.delayed(Duration(seconds: 5));
-      _authServiceProvider.signIn(email: email, password: password);
-
-      final user = await _authServiceProvider.getAuthState();
-
-      if (user == null) {
-        return false;
-      }
-      return true;
-     } catch (e) {
+      await Future.delayed(Duration(milliseconds: 500));
+      return await _authServiceProvider.signIn(email: email, password: password); 
+    } catch (e) {
       throw Exception('An error happened $e');
     } finally {
       _setLoading(false);
@@ -61,7 +77,7 @@ class AuthStateProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       await Future.delayed(Duration(seconds: 5));
-      _authServiceProvider.signIn(email: email, password: password);
+      await _authServiceProvider.signUp(email: email, password: password);
     } catch (e) {
       throw Exception('An error happened');
     } finally {
@@ -69,12 +85,14 @@ class AuthStateProvider extends ChangeNotifier {
     }
   }
 
-  void signOut() {
+  Future<bool> signOut() async {
+    _setLoading(true);
     try {
-      _authServiceProvider.signOut();
-      notifyListeners();
-    } catch (e) {
+      return await _authServiceProvider.signOut();
+     } catch (e) {
       throw Exception(e.toString());
+    } finally {
+      _setLoading(false);
     }
   }
 }

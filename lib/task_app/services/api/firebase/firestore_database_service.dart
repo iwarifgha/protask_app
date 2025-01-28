@@ -99,7 +99,7 @@ class FirestoreDatabase {
 //----------------USER PROFILE METHODS-------------------//
 
 //CREATE USER PROFILE
-  Future<void> createUserProfile({required UserM user}) async {
+  Future<void> createUserProfile({required UserProfile user}) async {
     DocumentReference userDoc = _fireStore.collection('users').doc(user.userId);
 
     try {
@@ -116,12 +116,12 @@ class FirestoreDatabase {
   }
 
 //GET USER PROFILE
-  Future<UserM> getUserProfile({required String userId}) async {
+  Future<UserProfile> getUserProfile({required String userId}) async {
     try {
       final snapshot = await _fireStore.collection('users').doc(userId).get();
       final user = snapshot.data();
       if (user != null) {
-        return UserM.fromMap(user);
+        return UserProfile.fromMap(user);
       }
       throw Exception('User not found');
     } catch (e) {

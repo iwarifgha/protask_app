@@ -25,9 +25,9 @@ class TaskAppAuthServiceProvider {
     }
   }
 
-  Future<void> signIn({required String email, required String password}) async {
+  Future<bool> signIn({required String email, required String password}) async {
     try {
-      await firebaseAuthProvider.signIn(email: email, password: password);
+      return await firebaseAuthProvider.signIn(email: email, password: password);
     } catch (e) {
       throw Exception(e);
     }
@@ -41,9 +41,9 @@ class TaskAppAuthServiceProvider {
     }
   }
 
-  Future<void> signOut() async {
+  Future<bool> signOut() async {
     try {
-      await firebaseAuthProvider.signOut();
+      return await firebaseAuthProvider.signOut();
     } catch (e) {
       throw Exception(e);
     }

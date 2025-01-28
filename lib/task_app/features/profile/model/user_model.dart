@@ -13,8 +13,8 @@ abstract class UserProfileModel {
 }
 
 //App User. This can be modified in future in case of new user features.
-class UserM extends UserProfileModel {
-  UserM(
+class UserProfile extends UserProfileModel {
+  UserProfile(
       {required super.userId,
       required super.displayName,
       required super.email,
@@ -29,8 +29,8 @@ class UserM extends UserProfileModel {
     };
   }
 
-  factory UserM.fromMap(Map<String, dynamic> map) {
-    return UserM(
+  factory UserProfile.fromMap(Map<String, dynamic> map) {
+    return UserProfile(
       userId: map['user_id'] ?? '',
       displayName: map['display_name'] ?? '',
       joined: map['created_at'] ?? '',

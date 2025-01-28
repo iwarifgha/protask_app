@@ -14,14 +14,18 @@ class UserPreferences {
     return prefs.getBool(isSignedInKey) ?? false;
   }
 
-  Future<bool> setSignedInState() async {
+  Future<bool> setSignedInStateAsTrue() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.setBool(isSignedInKey, true);
+  }
+
+  Future<bool> setSignedInStateAsFalse() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.setBool(isSignedInKey, false);
   }
 
   Future<bool> setOnboardedState() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.setBool(hasOnboardedKey, true);
   }
-
 }

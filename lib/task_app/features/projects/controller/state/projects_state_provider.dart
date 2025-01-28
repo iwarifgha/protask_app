@@ -8,8 +8,17 @@ class ProjectsStateProvider with ChangeNotifier {
 
   List<Project> get projects => _projects;
   final _projectServiceProvider = ProjectsServiceProvider();
+
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
+
+  _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
 
   Future<void> addProject(
       {required String title,
@@ -33,9 +42,9 @@ class ProjectsStateProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchProjects(String userId) async {
+  Future<void> fetchProjects() async {
     try {
-      _projects = await _projectServiceProvider.fetchProjects(userId);
+      _projects = await _projectServiceProvider.fetchProjects();
       _errorMessage = null;
       notifyListeners();
     } catch (e) {

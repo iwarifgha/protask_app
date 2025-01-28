@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
 
 import '../../../utils/error_notifier.dart';
-import '../../authentication/controller/service/auth_service.dart';
 import '../../authentication/controller/state/auth_state_provider.dart';
 import '../controller/state/projects_state_provider.dart';
 
@@ -17,14 +16,11 @@ class ProjectsView extends StatefulWidget {
 }
 
 class _ProjectsViewState extends State<ProjectsView> {
-  final authProvider = TaskAppAuthServiceProvider();
-
+  bool loading = false;
   @override
   void initState() {
-    final user = authProvider.getCurrentUser();
     setState(() {
-      Provider.of<ProjectsStateProvider>(context, listen: false)
-          .fetchProjects(user.uid);
+      context.read<ProjectsStateProvider>().fetchProjects();
     });
     super.initState();
   }
@@ -33,28 +29,61 @@ class _ProjectsViewState extends State<ProjectsView> {
     context.read<ProjectsStateProvider>().deleteProject(taskId);
   }
 
-  _signOut() {
-    context.read<AuthStateProvider>().signOut();
-    context.go(SignInView.path);
+  _signOut() async {
+    final state = context.read<AuthStateProvider>();
+    final router = GoRouter.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    
+    setState(() {
+      loading = true;
+    });
+    try {
+      final signedOut = await state.signOut();
+      if (signedOut == true) {
+        await state.setSignedInStateAsFalse();
+        setState(() {
+          loading = false;
+        });
+         router.go(SignInView.path);
+      }
+    } on Exception {
+      messenger.showSnackBar(
+        SnackBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            content: SizedBox(
+              width: 100,
+              height: 80,
+              child: DecoratedBox(
+                  decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Text('Unable to sign out')),
+            )),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final projectProvider = context.watch<ProjectsStateProvider>();
-    final projects = projectProvider.projects;
-    final errorMessage = projectProvider.errorMessage;
-    final user = authProvider.getCurrentUser();
+    final projectStateProvider = context.watch<ProjectsStateProvider>();
+    final projects = projectStateProvider.projects;
+    final errorMessage = projectStateProvider.errorMessage;
 
     return Scaffold(
-      appBar: AppBar(
-          title: const Text('Projects'),
-          actions: [IconButton(onPressed: _signOut, icon: Icon(Icons.logout))]),
+      appBar: AppBar(title: const Text('Projects'), actions: [
+        IconButton(
+            onPressed: () => _signOut(),
+            icon: loading == true
+                ? CircularProgressIndicator()
+                : Icon(Icons.logout))
+      ]),
       body: errorMessage != null
           ? ErrorNotifier(
               message: errorMessage,
               onTap: () {
-                projectProvider.clearError();
-                projectProvider.fetchProjects(user.uid);
+                projectStateProvider.clearError();
+                projectStateProvider.fetchProjects();
               })
           : projects.isEmpty
               ? const Center(
@@ -75,7 +104,7 @@ class _ProjectsViewState extends State<ProjectsView> {
                                 onPressed: () {}, icon: const Icon(Icons.edit)),
                             IconButton(
                                 onPressed: () {
-                                  projectProvider.clearError();
+                                  projectStateProvider.clearError();
                                   _deleteTask(
                                     taskId: project.projectId,
                                   );
