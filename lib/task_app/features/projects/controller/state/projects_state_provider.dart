@@ -27,6 +27,7 @@ class ProjectsStateProvider with ChangeNotifier {
       required String goal,
       required String timeCreated}) async {
     try {
+      _setLoading(true);
       final project = await _projectServiceProvider.addProject(
           title: title,
           duration: duration,

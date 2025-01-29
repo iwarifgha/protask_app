@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:task_app/task_app/features/projects/model/project/projects_model.dart';
 import 'package:task_app/task_app/features/tasks/model/task/task_model.dart';
 import 'package:task_app/task_app/services/api/firebase/auth/firebase_auth_service.dart';
