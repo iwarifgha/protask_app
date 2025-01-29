@@ -51,7 +51,26 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.3.6
+
+
   flutter_lints: ^5.0.0
+
+flutter_native_splash:
+  color: "#ffffff"  # Background color
+  image: assets\images\Pro Hadid (1).png  # Path to your logo
+  android_12:
+    image: assets\images\Pro Hadid (1).png
+    icon_background_color: "#ffffff"
+    
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/Pro Hadid.png" # Replace with your logo path
+  adaptive_icon_background: "#ffffff" # Background color for Android
+  adaptive_icon_foreground: "assets/images/Pro Hadid.png"
+  
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
