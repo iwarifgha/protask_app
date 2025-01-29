@@ -59,9 +59,9 @@ dev_dependencies:
 
 flutter_native_splash:
   color: "#ffffff"  # Background color
-  image: assets\images\Pro Hadid (1).png  # Path to your logo
+  image: assets\images\Pro Hadid.png  # Path to your logo
   android_12:
-    image: assets\images\Pro Hadid (1).png
+    image: assets\images\Pro Hadid.png
     icon_background_color: "#ffffff"
     
 flutter_launcher_icons:
