@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/controller/state/auth_state_provider.dart';
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
+import 'package:task_app/task_app/utils/widgets/error_notifier.dart';
 
 class SignInView extends StatefulWidget {
   static String path = '/sign_in';
@@ -76,6 +77,8 @@ class _SignInViewState extends State<SignInView> {
               CircularProgressIndicator(
                 color: Colors.black,
               ),
+            if (state.errorMessage != null)
+               ErrorNotifier(message: state.errorMessage!, onTap: ()=> _login)
           ],
         ),
       ),

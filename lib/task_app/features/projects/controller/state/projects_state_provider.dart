@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:task_app/task_app/features/projects/controller/services/projects_service_provider.dart';
 import 'package:task_app/task_app/features/projects/model/project/projects_model.dart';
+import 'package:task_app/task_app/utils/functions/error_handler.dart';
 
 class ProjectsStateProvider with ChangeNotifier {
   List<Project> _projects = [];
@@ -36,7 +37,8 @@ class ProjectsStateProvider with ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Failed to add task. Please try again';
+      final errorMsg = handleError(e);
+      _errorMessage = errorMsg;
     } finally {
       notifyListeners();
     }
@@ -48,7 +50,8 @@ class ProjectsStateProvider with ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Failed to fetch your home. Please try again';
+      final errorMsg = handleError(e);
+      _errorMessage = errorMsg;
     } finally {
       notifyListeners();
     }
@@ -61,7 +64,8 @@ class ProjectsStateProvider with ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Failed to delete your task. Please try again';
+      final errorMsg = handleError(e);
+      _errorMessage = errorMsg;
     } finally {
       notifyListeners();
     }
@@ -74,23 +78,14 @@ class ProjectsStateProvider with ChangeNotifier {
           _projects.indexWhere((project) => project.projectId == projectId);
       if (projectIndex == -1) return;
 
-      // final specificProject = _projects[projectIndex];
-      // final editedProject = Project(
-      //     projectId: projectId,
-      //     userId: specificProject.userId,
-      //     title: title ?? specificProject.title,
-      //     goal: specificProject.goal,
-      //     duration: specificProject.duration,
-      //     tasks: specificProject.tasks,
-      //     timeCreated: specificProject.timeCreated);
-
       final newProject = await _projectServiceProvider.editProject(
           projectId: projectId, title: title, duration: duration);
       _projects[projectIndex] = newProject;
       _errorMessage = null;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Could not update task. Please try again';
+      final errorMsg = handleError(e);
+      _errorMessage = errorMsg;
     } finally {
       notifyListeners();
     }

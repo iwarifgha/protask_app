@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
 
-import '../../../utils/error_notifier.dart';
+import '../../../utils/widgets/error_notifier.dart';
 import '../../authentication/controller/state/auth_state_provider.dart';
 import '../controller/state/projects_state_provider.dart';
 

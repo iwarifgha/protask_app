@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:task_app/task_app/features/projects/model/project/projects_model.dart';
 import 'package:task_app/task_app/features/tasks/model/task/task_model.dart';
-import 'package:task_app/task_app/services/api/firebase/firebase_auth_service.dart';
-import 'package:task_app/task_app/services/api/firebase/firestore_database_service.dart';
+import 'package:task_app/task_app/services/api/firebase/auth/firebase_auth_service.dart';
+import 'package:task_app/task_app/services/api/firebase/firestore/firestore_database_service.dart';
 import 'package:uuid/uuid.dart';
 
 class ProjectsServiceProvider {
@@ -31,7 +31,7 @@ class ProjectsServiceProvider {
       await _fireStoreDatabaseServiceProvider.addProject(project: project);
       return project;
     } catch (e) {
-      throw Exception(e.toString());
+      throw Exception(e);
     }
   }
 
@@ -45,7 +45,7 @@ class ProjectsServiceProvider {
           await _fireStoreDatabaseServiceProvider.fetchProjects(user.uid);
       return projects;
     } catch (e) {
-      throw Exception(e.toString());
+      throw Exception(e);
     }
   }
 
@@ -53,7 +53,7 @@ class ProjectsServiceProvider {
     try {
       await _fireStoreDatabaseServiceProvider.deleteProject(projectId);
     } catch (e) {
-      throw Exception(e.toString());
+      throw Exception(e);
     }
   }
 
@@ -64,7 +64,7 @@ class ProjectsServiceProvider {
           projectId: projectId, title: title, duration: duration);
       return project;
     } catch (e) {
-      throw Exception(e.toString());
+      throw Exception(e);
     }
   }
 }

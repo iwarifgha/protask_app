@@ -15,6 +15,7 @@ class SignUpView extends StatefulWidget {
 class _SignUpViewState extends State<SignUpView> {
   final _authProvider = TaskAppAuthServiceProvider();
   final _emailController = TextEditingController();
+  final _displayNameController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
@@ -33,6 +34,10 @@ class _SignUpViewState extends State<SignUpView> {
                 controller: _emailController,
                 decoration: const InputDecoration(labelText: 'Email')),
             TextField(
+                controller: _displayNameController,
+                decoration:
+                    const InputDecoration(labelText: 'Choose a cool name')),
+            TextField(
               controller: _passwordController,
               decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
@@ -41,7 +46,8 @@ class _SignUpViewState extends State<SignUpView> {
                 onPressed: () {
                   _authProvider.signUp(
                       email: _emailController.text.trim(),
-                      password: _passwordController.text.trim());
+                      password: _passwordController.text.trim(),
+                      displayName: _displayNameController.text.trim());
                   Navigator.pushNamed(context, '/sign_in');
                 },
                 child: const Text('Sign Up'))

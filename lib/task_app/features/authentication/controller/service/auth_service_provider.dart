@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:task_app/task_app/features/profile/controller/services/user_profile_service.dart';
+import 'package:task_app/task_app/utils/exceptions/exceptions.dart';
 
-import '../../../../services/api/firebase/firebase_auth_service.dart';
+import '../../../../services/api/firebase/auth/firebase_auth_service.dart';
 
 class TaskAppAuthServiceProvider {
   final firebaseAuthProvider = FirebaseAuthService();
@@ -16,9 +17,12 @@ class TaskAppAuthServiceProvider {
     }
   }
 
-  Future<User?> getAuthState() async {
+  Future<User> getAuthState() async {
     try {
       final status = await firebaseAuthProvider.getAuthState();
+       if (status == null) {
+        throw UserNotFoundException();
+      }
       return status;
     } catch (e) {
       throw Exception(e);
@@ -33,9 +37,9 @@ class TaskAppAuthServiceProvider {
     }
   }
 
-  Future<void> signUp({required String email, required String password}) async {
+  Future<void> signUp({required String email, required String password, required String displayName}) async {
     try {
-      await firebaseAuthProvider.signUp(email: email, password: password);
+      await firebaseAuthProvider.signUp(email: email, password: password, displayName: displayName);
     } catch (e) {
       throw Exception(e);
     }

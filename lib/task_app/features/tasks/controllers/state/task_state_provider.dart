@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:task_app/task_app/features/tasks/controllers/service/task_service_provider.dart';
 import 'package:task_app/task_app/features/tasks/model/task/task_model.dart';
+import 'package:task_app/task_app/utils/functions/error_handler.dart';
 
 class TaskStateProvider extends ChangeNotifier {
   List<Task> _tasks = [];
@@ -33,7 +34,8 @@ class TaskStateProvider extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Failed to add task. Please try again';
+      final errorMsg = handleError(e);
+      _errorMessage = errorMsg;
     } finally {
       notifyListeners();
     }
@@ -45,7 +47,8 @@ class TaskStateProvider extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Failed to fetch your home. Please try again';
+      final errorMsg = handleError(e);
+      _errorMessage = errorMsg;
     } finally {
       notifyListeners();
     }
@@ -60,7 +63,8 @@ class TaskStateProvider extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Failed to delete your task. Please try again';
+      final errorMsg = handleError(e);
+      _errorMessage = errorMsg;
     } finally {
       notifyListeners();
     }
@@ -86,7 +90,8 @@ class TaskStateProvider extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Could not update task. Please try again';
+      final errorMsg = handleError(e);
+      _errorMessage = errorMsg;
     } finally {
       notifyListeners();
     }

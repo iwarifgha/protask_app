@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:task_app/task_app/features/tasks/model/task/task_model.dart';
-import 'package:task_app/task_app/services/api/firebase/firestore_database_service.dart';
+import 'package:task_app/task_app/services/api/firebase/firestore/firestore_database_service.dart';
 import 'package:uuid/uuid.dart';
 
 class TaskServiceProvider {
