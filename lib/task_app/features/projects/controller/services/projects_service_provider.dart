@@ -11,7 +11,7 @@ class ProjectsServiceProvider {
 
   Future<Project> addProject(
       {required String title,
-      required String duration,
+      required int duration,
       required String goal,
       required String timeCreated,
       required List<Task> tasks}) async {

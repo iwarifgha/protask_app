@@ -6,7 +6,7 @@ abstract class ProjectsModel {
   final String userId;
   final String title;
   final String goal;
-  final String duration;
+  final int duration;
   final String timeCreated;
   final bool allTasksCompleted;
   final List<Task> tasks;
@@ -53,7 +53,7 @@ class Project extends ProjectsModel {
         userId: json['time'],
         title: json['title'] ?? '',
         goal: json['description'] ?? '',
-        duration: json['userId'] ?? '',
+        duration: json['userId'] ?? 0,
         timeCreated: json['created_at'] ?? '',
         allTasksCompleted: json['all_tasks_completed'],
         tasks: List<Task>.from(json['tasks']));

@@ -5,16 +5,17 @@ import 'package:task_app/task_app/features/authentication/controller/state/auth_
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
 import 'package:task_app/task_app/features/authentication/view/welcome.dart';
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
+import 'package:task_app/task_app/utils/widgets/loading_widget.dart';
 
-class Splash extends StatefulWidget {
+class SplashView extends StatefulWidget {
   static const path = '/splash';
-  const Splash({super.key});
+  const SplashView({super.key});
 
   @override
-  State<Splash> createState() => _SplashState();
+  State<SplashView> createState() => _SplashViewState();
 }
 
-class _SplashState extends State<Splash> {
+class _SplashViewState extends State<SplashView> {
   @override
   void initState() {
     super.initState();
@@ -36,17 +37,15 @@ class _SplashState extends State<Splash> {
         ? context.go(WelcomeView.path)
         : hasOnboarded == true && isSignedIn == false
             ? context.go(SignInView.path)
-            : context.go(ProjectsView.path);
+            : context.go(MyProjectsView.path);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: Container(
-      color: Colors.lightBlue,
-      child: Center(
-        child: Text('ProTask'),
-      ),
+      color: Colors.white,
+      child: Center(child: ProtaskLoader()),
     ));
   }
 }

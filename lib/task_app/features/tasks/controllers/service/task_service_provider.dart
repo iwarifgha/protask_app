@@ -4,7 +4,7 @@ import 'package:task_app/task_app/services/api/firebase/firestore/firestore_data
 import 'package:uuid/uuid.dart';
 
 class TaskServiceProvider {
-  var uuid = Uuid();
+  
   final _fireStoreDatabaseServiceProvider = FirestoreDatabase();
 
   Future<Task> addTask({
@@ -17,7 +17,7 @@ class TaskServiceProvider {
     required String projectId,
   }) async {
     final task = Task(
-        taskId: uuid.v4(),
+        taskId: taskId,
         title: title,
         description: description,
         startDate: startDate,

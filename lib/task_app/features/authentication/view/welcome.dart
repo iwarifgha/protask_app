@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/controller/state/auth_state_provider.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
+import 'package:task_app/task_app/utils/widgets/protask_main_button.dart';
 
 class WelcomeView extends StatelessWidget {
   static const path = '/welcome';
@@ -12,22 +13,53 @@ class WelcomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = context.read<AuthStateProvider>();
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Task App'),
-      ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 12,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: const Text('Welcome, Please click below to get started'),
+            RichText(
+              text: TextSpan(
+                  text: 'Welcome ',
+                  style: TextStyle(
+                      fontFamily: 'EB Garamond',
+                      color: Colors.lightBlue,
+                      fontSize: 35,
+                      fontWeight: FontWeight.bold)),
             ),
-            ElevatedButton(
-                onPressed: () {
-                  state.setOnboardedState();
-                  context.go(SignInView.path);
-                },
-                child: const Text(' Get Started ')),
+            RichText(
+                text: TextSpan(children: [
+              TextSpan(
+                  text: 'Your number ',
+                  style: TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Colors.black,
+                      fontSize: 25)),
+              TextSpan(
+                  text: ' ONE ',
+                  style: TextStyle(
+                      fontFamily: 'Noto Sans Mongolian',
+                      color: Colors.lightBlue,
+                      fontSize: 25)),
+              TextSpan(
+                  text: ' productivity companion ',
+                  style: TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Colors.black,
+                      fontSize: 25)),
+            ])),
+            SizedBox(
+              height: 21,
+            ),
+            ProtaskButton(
+              text: ' Get Started ',
+              onTap: () {
+                state.setOnboardedState();
+                context.go(SignInView.path);
+              },
+            )
           ],
         ),
       ),

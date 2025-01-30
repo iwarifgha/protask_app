@@ -2,21 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
+import 'package:task_app/task_app/utils/widgets/project_tile.dart';
+import 'package:task_app/task_app/utils/widgets/protask_icon_button.dart';
+import 'package:task_app/task_app/utils/widgets/protask_icon_text_button.dart';
+import 'package:task_app/task_app/utils/widgets/protask_text_field.dart';
 
 import '../../../utils/widgets/error_notifier.dart';
 import '../../authentication/controller/state/auth_state_provider.dart';
 import '../controller/state/projects_state_provider.dart';
 
-class ProjectsView extends StatefulWidget {
+class MyProjectsView extends StatefulWidget {
   static const path = '/projects';
-  const ProjectsView({super.key});
+  const MyProjectsView({super.key});
 
   @override
-  State<ProjectsView> createState() => _ProjectsViewState();
+  State<MyProjectsView> createState() => _MyProjectsViewState();
 }
 
-class _ProjectsViewState extends State<ProjectsView> {
+class _MyProjectsViewState extends State<MyProjectsView> {
   bool loading = false;
+
   @override
   void initState() {
     setState(() {
@@ -33,7 +38,7 @@ class _ProjectsViewState extends State<ProjectsView> {
     final state = context.read<AuthStateProvider>();
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    
+
     setState(() {
       loading = true;
     });
@@ -44,24 +49,81 @@ class _ProjectsViewState extends State<ProjectsView> {
         setState(() {
           loading = false;
         });
-         router.go(SignInView.path);
+        router.go(SignInView.path);
       }
     } on Exception {
       messenger.showSnackBar(
         SnackBar(
             elevation: 0,
             backgroundColor: Colors.transparent,
-            content: SizedBox(
-              width: 100,
-              height: 80,
-              child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Text('Unable to sign out')),
-            )),
+            content: ErrorNotifier(message: state.errorMessage!)),
       );
     }
+  }
+
+  void _showProjectSheet() {
+    final titleController = TextEditingController();
+    final durationController = TextEditingController();
+    final goalController = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.80,
+          padding: EdgeInsets.all(16),
+          child: Column(
+            spacing: 8,
+            children: [
+              Text("Add Project",
+                  style: Theme.of(context).textTheme.titleLarge),
+              SizedBox(height: 10),
+              ProtaskTextField(
+                  label: 'Title of project', controller: titleController),
+              ProtaskTextField(
+                  label: 'Estimated duration (in days)',
+                  controller: durationController),
+              SizedBox(height: 10),
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    maxLines: null,
+                    controller: goalController,
+                    decoration: InputDecoration(border: InputBorder.none),
+                  ),
+                ),
+              ),
+              ProtaskIconTextButton(
+                icon: Icons.add,
+                text: 'Add Project',
+                onPressed: () {
+                  String title = titleController.text.trim();
+                  String goal = goalController.text.trim();
+                  int duration = int.tryParse(durationController.text) ?? 0;
+
+                  if (title.isNotEmpty && goal.isNotEmpty) {
+                    context.read<ProjectsStateProvider>().addProject(
+                        title: title,
+                        duration: duration,
+                        goal: goal,
+                        timeCreated: DateTime.now().toString());
+                    Navigator.pop(context); // Close the modal
+                  }
+                },
+              )
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -72,11 +134,7 @@ class _ProjectsViewState extends State<ProjectsView> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Projects'), actions: [
-        IconButton(
-            onPressed: () => _signOut(),
-            icon: loading == true
-                ? CircularProgressIndicator()
-                : Icon(Icons.logout))
+        IconButton(onPressed: () {}, icon: Icon(Icons.menu_open_rounded))
       ]),
       body: errorMessage != null
           ? ErrorNotifier(
@@ -93,33 +151,13 @@ class _ProjectsViewState extends State<ProjectsView> {
                   itemCount: projects.length,
                   itemBuilder: (context, index) {
                     final project = projects[index];
-                    return ListTile(
-                      title: Text(project.title),
-                      subtitle: Text(project.goal),
-                      trailing: SizedBox(
-                        width: 100,
-                        child: Row(
-                          children: [
-                            IconButton(
-                                onPressed: () {}, icon: const Icon(Icons.edit)),
-                            IconButton(
-                                onPressed: () {
-                                  projectStateProvider.clearError();
-                                  _deleteTask(
-                                    taskId: project.projectId,
-                                  );
-                                },
-                                icon: const Icon(Icons.delete))
-                          ],
-                        ),
-                      ),
+                    return ProjectTile(
+                      project: project,
                     );
                   }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/add_task');
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: ProtaskIconButton(
+        icon: Icons.add,
+        onPressed: _showProjectSheet,
       ),
     );
   }

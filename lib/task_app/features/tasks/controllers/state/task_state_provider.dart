@@ -8,8 +8,17 @@ class TaskStateProvider extends ChangeNotifier {
 
   List<Task> get tasks => _tasks;
   final _taskServiceProvider = TaskServiceProvider();
+
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
+
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
+  _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
 
   Future<void> addTask({
     required String title,

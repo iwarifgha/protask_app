@@ -3,8 +3,15 @@ import 'package:go_router/go_router.dart';
 //import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/controller/state/auth_state_provider.dart';
+import 'package:task_app/task_app/features/authentication/view/forgot_password.dart';
+import 'package:task_app/task_app/features/authentication/view/sign_up.dart';
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
+import 'package:task_app/task_app/utils/functions/validators.dart';
+import 'package:task_app/task_app/utils/widgets/protask_icon_button.dart';
 import 'package:task_app/task_app/utils/widgets/error_notifier.dart';
+import 'package:task_app/task_app/utils/widgets/loading_widget.dart';
+import 'package:task_app/task_app/utils/widgets/protask_text.dart';
+import 'package:task_app/task_app/utils/widgets/protask_text_field.dart';
 
 class SignInView extends StatefulWidget {
   static String path = '/sign_in';
@@ -28,23 +35,22 @@ class _SignInViewState extends State<SignInView> {
         SnackBar(
             elevation: 0,
             backgroundColor: Colors.transparent,
-            content: SizedBox(
-              width: 100,
-              height: 80,
-              child: DecoratedBox(
-                  decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Center(child: Text('empty field'))),
-            )),
+            content: ErrorNotifier(message: 'Empty fields')),
       );
       return;
+    } else if (state.errorMessage != null) {
+      messenger.showSnackBar(
+        SnackBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            content: ErrorNotifier(message: state.errorMessage!)),
+      );
     } else {
       final signedIn = await state.signIn(
           email: _emailController.text, password: _passwordController.text);
       if (signedIn == true) {
         await state.setSignedInStateAsTrue();
-        router.go(ProjectsView.path);
+        router.go(MyProjectsView.path);
       }
       return;
     }
@@ -61,24 +67,63 @@ class _SignInViewState extends State<SignInView> {
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Column(
-          spacing: 18,
+          spacing: 25,
           children: [
-            TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email')),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
+            Container(
+              height: 100,
+              width: 150,
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: AssetImage(
+                          'assets/images/Pro_Hadid-removebg-preview.png'))),
             ),
-            ElevatedButton(
-                onPressed: () => _login(), child: const Text('Sign In')),
-            if (state.isLoading == true)
-              CircularProgressIndicator(
-                color: Colors.black,
-              ),
-            if (state.errorMessage != null)
-               ErrorNotifier(message: state.errorMessage!, onTap: ()=> _login)
+            ProtaskTextField(
+              label: 'Email',
+              controller: _emailController,
+              validator: (email) {
+                email = _emailController.text.trim();
+                return emailValidator(email);
+              },
+            ),
+            Column(
+              spacing: 8,
+              children: [
+                ProtaskTextField(
+                  label: 'Password',
+                  controller: _passwordController,
+                  validator: (pass) {
+                    pass = _passwordController.text;
+                    return passwordValidator(pass);
+                  },
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: InkWell(
+                    onTap: () {
+                      context.go(ForgotPasswordView.path);
+                    },
+                    child: ProtaskCustomText(
+                      color: Colors.grey,
+                      text: 'Forgot Password',
+                    ),
+                  ),
+                )
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                    onPressed: () {
+                      context.go(SignUpView.path);
+                    },
+                    child: ProtaskCustomText(fontSize: 17, text: 'Sign Up')),
+                ProtaskIconButton(
+                    icon: Icons.arrow_forward, onPressed: () => _login())
+              ],
+            ),
+            if (state.isLoading == true) ProtaskLoader(),
           ],
         ),
       ),

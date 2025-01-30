@@ -23,7 +23,7 @@ class ProjectsStateProvider with ChangeNotifier {
 
   Future<void> addProject(
       {required String title,
-      required String duration,
+      required int duration,
       required String goal,
       required String timeCreated}) async {
     try {
