@@ -16,12 +16,15 @@ class ProtaskIconTextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
+      style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(Colors.black),
+          iconColor: WidgetStateProperty.all(Colors.white),
+          textStyle: WidgetStatePropertyAll(TextStyle(color: Colors.white))),
       onPressed: onPressed,
       icon: Icon(
         icon,
-        color: Colors.black,
       ),
-      label: ProtaskCustomText(text: text),
+      label: ProtaskCustomText(text: text, color: Colors.white),
     );
   }
 }

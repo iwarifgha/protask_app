@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
+import 'package:task_app/task_app/features/projects/model/project/projects_model.dart';
+import 'package:task_app/task_app/features/projects/view/project_details_screen.dart';
 import 'package:task_app/task_app/utils/widgets/project_tile.dart';
+import 'package:task_app/task_app/utils/widgets/protask_drawer.dart';
 import 'package:task_app/task_app/utils/widgets/protask_icon_button.dart';
 import 'package:task_app/task_app/utils/widgets/protask_icon_text_button.dart';
 import 'package:task_app/task_app/utils/widgets/protask_text_field.dart';
@@ -25,7 +28,7 @@ class _MyProjectsViewState extends State<MyProjectsView> {
   @override
   void initState() {
     setState(() {
-      context.read<ProjectsStateProvider>().fetchProjects();
+      //context.read<ProjectsStateProvider>().fetchProjects();
     });
     super.initState();
   }
@@ -133,28 +136,53 @@ class _MyProjectsViewState extends State<MyProjectsView> {
     final errorMessage = projectStateProvider.errorMessage;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Projects'), actions: [
-        IconButton(onPressed: () {}, icon: Icon(Icons.menu_open_rounded))
-      ]),
-      body: errorMessage != null
-          ? ErrorNotifier(
-              message: errorMessage,
-              onTap: () {
-                projectStateProvider.clearError();
-                projectStateProvider.fetchProjects();
-              })
-          : projects.isEmpty
-              ? const Center(
-                  child: Text('No Tasks'),
-                )
-              : ListView.builder(
-                  itemCount: projects.length,
-                  itemBuilder: (context, index) {
-                    final project = projects[index];
-                    return ProjectTile(
-                      project: project,
-                    );
-                  }),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: const Text('Projects'),
+          actions: [
+            Builder(builder: (context) {
+              return IconButton(
+                  onPressed: () {
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                  icon: Icon(Icons.menu_outlined));
+            })
+          ]),
+      endDrawer: ProtaskAppDrawer(),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade100),
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+          boxShadow: const [
+            BoxShadow(
+              offset: Offset(0, 9),
+              color: Color(0xFFE6E5EA),
+              blurRadius: 1,
+            ),
+          ],
+        ),
+        child: mockProject.isEmpty
+            ? const Center(
+                child: Text('No Tasks'),
+              )
+            : ListView.builder(
+                itemCount: mockProject.length,
+                //projects.length,
+                itemBuilder: (context, index) {
+                  final project = mockProject[index];
+                  return ProjectTile(
+                    project: project,
+                    onTap: () =>
+                        context.go(ProjectDetailsView.path, extra: project),
+                  );
+                }),
+      ),
       floatingActionButton: ProtaskIconButton(
         icon: Icons.add,
         onPressed: _showProjectSheet,
@@ -162,3 +190,27 @@ class _MyProjectsViewState extends State<MyProjectsView> {
     );
   }
 }
+
+List<Project> mockProject = [
+  Project(
+      projectId: 'projectId',
+      userId: 'userId',
+      title: 'Mobile App Development',
+      goal:
+          'The goal of this project is to finish build ing  a mobile app in sixdays using AI',
+      duration: 6,
+      tasks: [],
+      timeCreated: DateTime.now().toIso8601String(),
+      allTasksCompleted: false),
+  Project(
+      projectId: 'projectId',
+      userId: 'userId',
+      title: 'List Creation',
+      goal:
+          'The aim of this project is to have a list of all top influencers in the mobile phone industry on Linkedin.'
+          'This will be used for cold outreach purposes',
+      duration: 30,
+      tasks: [],
+      timeCreated: DateTime.now().toIso8601String(),
+      allTasksCompleted: false),
+];
