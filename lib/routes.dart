@@ -14,7 +14,7 @@ import 'package:task_app/task_app/features/tasks/model/task/task_model.dart';
 import 'package:task_app/task_app/features/tasks/view/task_details.dart';
 
 final GoRouter appRoutes = GoRouter(
-  initialLocation: MyProjectsView.path,
+  initialLocation: SplashView.path,
   routes: [
     GoRoute(path: SplashView.path, builder: (context, state) => SplashView()),
     GoRoute(path: WelcomeView.path, builder: (context, state) => WelcomeView()),

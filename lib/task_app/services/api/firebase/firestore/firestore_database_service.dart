@@ -13,17 +13,17 @@ class FirestoreDatabase {
   final _auth = FirebaseAuth.instance;
 //----------------TASKS METHODS-------------------//
 
-  Future<Task> addTask({required String projectId, required Task task}) async {
+  Future<Task> addTask({required Task task}) async {
     try {
     await FirebaseFirestore.instance
       .collection('projects')
-      .doc(projectId)
+      .doc(task.projectId)
       .collection('tasks')
       .doc()
       .set(task.toMap());
   
   final singleTask =
-      await getSingleTask(projectId: projectId, taskId: task.taskId);
+      await getSingleTask(projectId: task.projectId, taskId: task.taskId);
   return singleTask;
 } on SocketException {
       throw NoInternetException();

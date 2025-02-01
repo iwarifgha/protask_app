@@ -4,7 +4,6 @@ import 'package:task_app/task_app/services/api/firebase/firestore/firestore_data
 import 'package:uuid/uuid.dart';
 
 class TaskServiceProvider {
-  
   final _fireStoreDatabaseServiceProvider = FirestoreDatabase();
 
   Future<Task> addTask({
@@ -17,17 +16,17 @@ class TaskServiceProvider {
     required String projectId,
   }) async {
     final task = Task(
+        projectId: projectId,
         taskId: taskId,
         title: title,
         description: description,
         startDate: startDate,
         endDate: endDate,
         timeCreated: Timestamp.now().toDate().toIso8601String(),
-        isCompleted: false
-        );
+        isCompleted: false);
     try {
       await _fireStoreDatabaseServiceProvider.addTask(
-          task: task, projectId: projectId);
+          task: task);
       return task;
     } catch (e) {
       throw Exception(e.toString());
@@ -59,9 +58,9 @@ class TaskServiceProvider {
       required String taskId,
       required Map<String, dynamic> fields}) async {
     try {
-       await _fireStoreDatabaseServiceProvider.editTask(
+      await _fireStoreDatabaseServiceProvider.editTask(
           projectId: projectId, taskId: taskId, fieldsToUpdate: fields);
-     } catch (e) {
+    } catch (e) {
       throw Exception(e.toString());
     }
   }

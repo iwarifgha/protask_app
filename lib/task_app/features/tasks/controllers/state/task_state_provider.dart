@@ -15,8 +15,17 @@ class TaskStateProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  bool _isEditing = false;
+  bool get isEditing => _isEditing;
+
   _setLoading(bool value) {
     _isLoading = value;
+    notifyListeners();
+  }
+
+  setEditingStatus(bool value) {
+    _isEditing = value;
+    print(_isEditing);
     notifyListeners();
   }
 
@@ -96,6 +105,7 @@ class TaskStateProvider extends ChangeNotifier {
       };
       await _taskServiceProvider.editTask(
           projectId: projectId, taskId: taskId, fields: fields);
+      setEditingStatus(false);
       _errorMessage = null;
       notifyListeners();
     } catch (e) {

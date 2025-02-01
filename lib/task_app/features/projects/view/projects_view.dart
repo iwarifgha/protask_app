@@ -33,9 +33,7 @@ class _MyProjectsViewState extends State<MyProjectsView> {
     super.initState();
   }
 
-  _deleteTask({required String taskId}) {
-    context.read<ProjectsStateProvider>().deleteProject(taskId);
-  }
+ 
 
   _signOut() async {
     final state = context.read<AuthStateProvider>();
@@ -167,15 +165,15 @@ class _MyProjectsViewState extends State<MyProjectsView> {
             ),
           ],
         ),
-        child: mockProject.isEmpty
+        child: projects.isEmpty
             ? const Center(
-                child: Text('No Tasks'),
+                child: Text('You have no projects yet'),
               )
             : ListView.builder(
-                itemCount: mockProject.length,
+                itemCount: projects.length,
                 //projects.length,
                 itemBuilder: (context, index) {
-                  final project = mockProject[index];
+                  final project = projects[index];
                   return ProjectTile(
                     project: project,
                     onTap: () =>
@@ -191,26 +189,26 @@ class _MyProjectsViewState extends State<MyProjectsView> {
   }
 }
 
-List<Project> mockProject = [
-  Project(
-      projectId: 'projectId',
-      userId: 'userId',
-      title: 'Mobile App Development',
-      goal:
-          'The goal of this project is to finish build ing  a mobile app in sixdays using AI',
-      duration: 6,
-      tasks: [],
-      timeCreated: DateTime.now().toIso8601String(),
-      allTasksCompleted: false),
-  Project(
-      projectId: 'projectId',
-      userId: 'userId',
-      title: 'List Creation',
-      goal:
-          'The aim of this project is to have a list of all top influencers in the mobile phone industry on Linkedin.'
-          'This will be used for cold outreach purposes',
-      duration: 30,
-      tasks: [],
-      timeCreated: DateTime.now().toIso8601String(),
-      allTasksCompleted: false),
-];
+// List<Project> mockProject = [
+//   Project(
+//       projectId: 'projectId',
+//       userId: 'userId',
+//       title: 'Mobile App Development',
+//       goal:
+//           'The goal of this project is to finish build ing  a mobile app in sixdays using AI',
+//       duration: 6,
+//       tasks: [],
+//       timeCreated: DateTime.now().toIso8601String(),
+//       allTasksCompleted: false),
+//   Project(
+//       projectId: 'projectId',
+//       userId: 'userId',
+//       title: 'List Creation',
+//       goal:
+//           'The aim of this project is to have a list of all top influencers in the mobile phone industry on Linkedin.'
+//           'This will be used for cold outreach purposes',
+//       duration: 30,
+//       tasks: [],
+//       timeCreated: DateTime.now().toIso8601String(),
+//       allTasksCompleted: false),
+// ];

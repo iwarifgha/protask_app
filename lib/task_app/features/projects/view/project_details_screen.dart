@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:task_app/task_app/features/projects/controller/state/projects_state_provider.dart';
 import 'package:task_app/task_app/features/projects/model/project/projects_model.dart';
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
 import 'package:task_app/task_app/features/tasks/controllers/state/task_state_provider.dart';
@@ -17,13 +18,16 @@ class ProjectDetailsView extends StatelessWidget {
 
   const ProjectDetailsView({super.key, required this.project});
 
+  _deleteProject({required BuildContext context, required String projectId}) {
+    context.read<ProjectsStateProvider>().deleteProject(projectId);
+  }
+
   void showAddTaskModal(BuildContext context, String projectId) {
     TextEditingController titleController = TextEditingController();
     TextEditingController descriptionController = TextEditingController();
     DateTime? startTime;
     DateTime? endTime;
     var uuid = Uuid();
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -108,10 +112,10 @@ class ProjectDetailsView extends StatelessWidget {
       child: Scaffold(
           appBar: AppBar(
             title: ProtaskCustomText(
-                overflow: TextOverflow.ellipsis,
                 fontSize: 18,
+                overflow: TextOverflow.ellipsis,
                 fontWeight: FontWeight.bold,
-                text: project.title),
+                text: 'Project Overview'),
             leading: IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: () {
@@ -134,7 +138,10 @@ class ProjectDetailsView extends StatelessWidget {
                         PopupMenuItem(
                           padding: EdgeInsets.only(left: 25),
                           child: Text('Delete'),
-                          onTap: () {},
+                          onTap: () {
+                            _deleteProject(
+                                projectId: project.projectId, context: context);
+                          },
                         )
                       ]);
                 },
@@ -178,10 +185,12 @@ class ProjectDetailsView extends StatelessWidget {
                             spacing: 15,
                             children: [
                               Icon(Icons.work_outline),
-                              ProtaskCustomText(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w100,
-                                  text: 'Project Overview'),
+                              Flexible(
+                                child: ProtaskCustomText(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w100,
+                                    text: project.title),
+                              ),
                             ],
                           ),
                           Row(
@@ -217,32 +226,34 @@ class ProjectDetailsView extends StatelessWidget {
                                   text: 'Tasks: '),
                             ],
                           ),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: mockTasks.length,
-                            //taskProvider.tasks.length,
-                            itemBuilder: (context, index) {
-                              final task = mockTasks[index];
-
-                              return ListTile(
-                                  onTap: () {
-                                    context.go(TaskDetailsView.path,
-                                        extra: task);
+                          taskProvider.tasks.isEmpty
+                              ? const Center(
+                                  child: Text('No Tasks'),
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: taskProvider.tasks.length,
+                                  itemBuilder: (context, index) {
+                                    final task = taskProvider.tasks[index];
+                                    return ListTile(
+                                        onTap: () {
+                                          context.go(TaskDetailsView.path,
+                                              extra: task);
+                                        },
+                                        title: ProtaskCustomText(
+                                            overflow: TextOverflow.ellipsis,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w300,
+                                            text: task.title),
+                                        subtitle: Text(
+                                            "${formatDate(task.startDate)} - ${formatDate(task.endDate)}"),
+                                        leading: Checkbox(
+                                            shape: CircleBorder(),
+                                            value: false,
+                                            onChanged: (value) {}));
                                   },
-                                  title: ProtaskCustomText(
-                                      overflow: TextOverflow.ellipsis,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w300,
-                                      text: task.title),
-                                  subtitle: Text(
-                                      "${formatDate(task.startDate)} - ${formatDate(task.endDate)}"),
-                                  leading: Checkbox(
-                                      shape: CircleBorder(),
-                                      value: false,
-                                      onChanged: (value) {}));
-                            },
-                          ),
+                                ),
                         ],
                       ),
                     ),
@@ -258,113 +269,45 @@ class ProjectDetailsView extends StatelessWidget {
   }
 }
 
-List<Task> mockTasks = [
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Design the Ui prototypes',
-      description:
-          'This involves using figma to create the first wirframes of how the app should look like',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250201"),
-      isCompleted: false),
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Implement core app features',
-      description:
-          'This involves using figma to create the first wirframes of how the app should look like',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250225"),
-      isCompleted: false),
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Test and Debug App for quality',
-      description:
-          'We will write unit, integration and widget test to ensure that all components work well',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250201"),
-      isCompleted: false),
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Implement core app features',
-      description:
-          'This involves using figma to create the first wirframes of how the app should look like',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250225"),
-      isCompleted: false),
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Design the Ui prototypes',
-      description:
-          'This involves using figma to create the first wirframes of how the app should look like',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250201"),
-      isCompleted: false),
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Implement core app features',
-      description:
-          'This involves using figma to create the first wirframes of how the app should look like',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250225"),
-      isCompleted: false),
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Design the Ui prototypes',
-      description:
-          'This involves using figma to create the first wirframes of how the app should look like',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250201"),
-      isCompleted: false),
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Implement core app features',
-      description:
-          'This involves using figma to create the first wirframes of how the app should look like',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250225"),
-      isCompleted: false),
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Design the Ui prototypes',
-      description:
-          'This involves using figma to create the first wirframes of how the app should look like',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250201"),
-      isCompleted: false),
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Implement core app features',
-      description:
-          'This involves using figma to create the first wirframes of how the app should look like',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250225"),
-      isCompleted: false),
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Design the Ui prototypes',
-      description:
-          'This involves using figma to create the first wirframes of how the app should look like',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250201"),
-      isCompleted: false),
-  Task(
-      timeCreated: DateTime.now().toIso8601String(),
-      title: 'Implement core app features',
-      description:
-          'This involves using figma to create the first wirframes of how the app should look like',
-      taskId: 'taskId',
-      startDate: DateTime.now(),
-      endDate: DateTime.parse("20250225"),
-      isCompleted: false)
-];
+// List<Task> mockTasks = [
+//   Task(
+//       timeCreated: DateTime.now().toIso8601String(),
+//       title: 'Design the Ui prototypes',
+//       description:
+//           'This involves using figma to create the first wirframes of how the app should look like',
+//       taskId: 'taskId',
+//       startDate: DateTime.now(),
+//       endDate: DateTime.parse("20250201"),
+//       isCompleted: false,
+//       projectId: ''),
+//   Task(
+//       timeCreated: DateTime.now().toIso8601String(),
+//       title: 'Implement core app features',
+//       description:
+//           'This involves using figma to create the first wirframes of how the app should look like',
+//       taskId: 'taskId',
+//       startDate: DateTime.now(),
+//       endDate: DateTime.parse("20250225"),
+//       isCompleted: false,
+//       projectId: ''),
+//   Task(
+//       timeCreated: DateTime.now().toIso8601String(),
+//       title: 'Test and Debug App for quality',
+//       description:
+//           'We will write unit, integration and widget test to ensure that all components work well',
+//       taskId: 'taskId',
+//       startDate: DateTime.now(),
+//       endDate: DateTime.parse("20250201"),
+//       isCompleted: false,
+//       projectId: ''),
+//   Task(
+//       timeCreated: DateTime.now().toIso8601String(),
+//       title: 'Implement core app features',
+//       description:
+//           'This involves using figma to create the first wirframes of how the app should look like',
+//       taskId: 'taskId',
+//       startDate: DateTime.now(),
+//       endDate: DateTime.parse("20250225"),
+//       isCompleted: false,
+//       projectId: ''),
+// ];

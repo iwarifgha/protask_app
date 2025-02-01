@@ -25,7 +25,7 @@ class AuthStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> initializeAuthProvider() async {
+  Future<void> checkOnboardStatus() async {
     _hasOnboarded = await _userPreferences.getOnboardState();
     _isSignedIn = await _userPreferences.getSignedInState();
     notifyListeners();
@@ -88,11 +88,15 @@ class AuthStateProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> signUp({required String email, required String displayName, required String password}) async {
+  Future<void> signUp(
+      {required String email,
+      required String displayName,
+      required String password}) async {
     _setLoading(true);
     try {
       await Future.delayed(Duration(seconds: 5));
-      await _authServiceProvider.signUp(email: email, password: password, displayName: displayName);
+      await _authServiceProvider.signUp(
+          email: email, password: password, displayName: displayName);
     } catch (e) {
       final errorMessage = handleError(e);
       _errorMessage = errorMessage;

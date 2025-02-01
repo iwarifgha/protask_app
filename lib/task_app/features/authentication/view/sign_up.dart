@@ -88,7 +88,7 @@ class _SignUpViewState extends State<SignUpView> {
               children: [
                 TextButton(
                     onPressed: () {
-                      context.go(SignUpView.path);
+                      context.go(SignInView.path);
                     },
                     child: ProtaskCustomText(fontSize: 17, text: 'Sign In')),
                 ProtaskIconButton(
