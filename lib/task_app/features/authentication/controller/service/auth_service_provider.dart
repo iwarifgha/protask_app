@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:task_app/task_app/features/profile/controller/services/user_profile_service.dart';
+import 'package:task_app/task_app/features/profile/model/user_model.dart';
 import 'package:task_app/task_app/utils/exceptions/exceptions.dart';
 
 import '../../../../services/api/firebase/auth/firebase_auth_service.dart';
@@ -29,7 +30,7 @@ class TaskAppAuthServiceProvider {
     }
   }
 
-  Future<bool> signIn({required String email, required String password}) async {
+  Future<UserProfile> signIn({required String email, required String password}) async {
     try {
       return await firebaseAuthProvider.signIn(email: email, password: password);
     } catch (e) {

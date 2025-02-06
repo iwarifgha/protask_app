@@ -48,15 +48,23 @@ class FirebaseAuthService {
   }
 
   //SIGN IN
-  Future<bool> signIn({required String email, required String password}) async {
+  Future<UserProfile> signIn(
+      {required String email, required String password}) async {
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
 
-      if (userCredential.user == null) {
-        return false;
+      if (userCredential.user != null) {
+        final user = userCredential.user;
+        final userProfile = UserProfile(
+            userId: user!.uid,
+            displayName: user.displayName ?? '',// no disply name enforced yet
+            email: user.email!,
+            joined: user.metadata.creationTime!.toIso8601String());
+        return userProfile;
       }
-      return true;
+
+      return throw UnexpectedErrorException(message: 'Could not sign you in..');
     } on SocketException {
       throw NoInternetException();
     } on HttpException {
@@ -64,10 +72,10 @@ class FirebaseAuthService {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException catch (e) {
-      throw UnexpectedErrorException(
+      throw FirebaseErrorException(
           message: 'An error occured while signing in..${e.message}');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw FirebaseErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
       if (kDebugMode) {

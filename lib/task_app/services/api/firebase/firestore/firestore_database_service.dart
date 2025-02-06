@@ -15,17 +15,15 @@ class FirestoreDatabase {
 
   Future<Task> addTask({required Task task}) async {
     try {
-    await FirebaseFirestore.instance
-      .collection('projects')
-      .doc(task.projectId)
-      .collection('tasks')
-      .doc()
-      .set(task.toMap());
-  
-  final singleTask =
-      await getSingleTask(projectId: task.projectId, taskId: task.taskId);
-  return singleTask;
-} on SocketException {
+      await FirebaseFirestore.instance
+          .collection('tasks')
+          .doc(task.taskId)
+          .set(task.toMap());
+
+      final singleTask =
+          await getSingleTask(projectId: task.projectId, taskId: task.taskId);
+      return singleTask;
+    } on SocketException {
       throw NoInternetException();
     } on HttpException {
       throw SomethingWentWrongException();
@@ -47,19 +45,16 @@ class FirestoreDatabase {
   }) async {
     try {
       final snapshot = await _fireStore
-          .collection('projects')
-          .doc(projectId)
           .collection('tasks')
-          .doc(taskId)
+          .where('projectId', isEqualTo: projectId)
+          .where('taskId', isEqualTo: taskId)
+          .limit(1)
           .get();
-      final data = snapshot.data();
-      if (data != null) {
-        return Task.fromMap(
-          data,
-          taskId: data['task_id'],
-        );
-      }
-      throw UnexpectedErrorException(message: 'Project not found');
+      final queryDoc = snapshot.docs.first;
+      final data = queryDoc.data();
+      return Task.fromMap(
+        data,
+      );
     } on SocketException {
       throw NoInternetException();
     } on HttpException {
@@ -79,15 +74,14 @@ class FirestoreDatabase {
   Future<List<Task>> fetchTasks(String projectId) async {
     try {
       final snapshot = await _fireStore
-          .collection('projects')
-          .doc(projectId)
           .collection('tasks')
+          .where('projectId', isEqualTo: projectId)
           .get();
+
       return snapshot.docs.map((doc) {
         final data = doc.data();
         return Task.fromMap(
           data,
-          taskId: data['task_id'],
         );
       }).toList();
     } on SocketException {
@@ -106,17 +100,24 @@ class FirestoreDatabase {
     }
   }
 
-  Future<void> editTask(
+  Future<Task> editTask(
       {required String projectId,
       required String taskId,
-      required Map<String, dynamic> fieldsToUpdate}) async {
+      String? title,
+      String? description}) async {
     try {
+      Map<String, dynamic> fields = {
+        if (description != null) 'description': description,
+        if (title != null) 'title': title
+      };
+
       await FirebaseFirestore.instance
-          .collection('projects')
-          .doc(projectId)
           .collection('tasks')
           .doc(taskId)
-          .update(fieldsToUpdate);
+          .update(fields);
+
+      final task = await getSingleTask(projectId: projectId, taskId: taskId);
+      return task;
     } on SocketException {
       throw NoInternetException();
     } on HttpException {
@@ -136,12 +137,7 @@ class FirestoreDatabase {
   Future<void> deleteTask(
       {required String projectId, required String taskId}) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('projects')
-          .doc(projectId)
-          .collection('tasks')
-          .doc(taskId)
-          .delete();
+      await FirebaseFirestore.instance.collection('tasks').doc(taskId).delete();
     } on SocketException {
       throw NoInternetException();
     } on HttpException {
@@ -299,12 +295,14 @@ class FirestoreDatabase {
 
 //----------------PROJECTS METHODS-------------------//
 
-  Future<void> addProject({required Project project}) async {
+  Future<Project> addProject({required Project project}) async {
     try {
       await _fireStore
           .collection('projects')
           .doc(project.projectId)
           .set(project.toMap());
+      final newProject = getSingleProject(projectId: project.projectId);
+      return newProject;
     } on SocketException {
       throw NoInternetException();
     } on HttpException {
@@ -312,9 +310,9 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw FirebaseErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw FirebaseErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
       throw UnexpectedErrorException(message: 'An unexpected error occured');
@@ -327,10 +325,19 @@ class FirestoreDatabase {
           .collection('projects')
           .where('userId', isEqualTo: userId)
           .get();
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        return Project.fromMap(data);
-      }).toList();
+
+      final p = snapshot.docs;
+
+      // map((doc) {
+      //   final data = doc.data();
+      //   return Project.fromMap(data);
+      // }).toList();
+      List<Project> projects = [];
+      for (var val in p) {
+        final data = Project.fromMap(val.data());
+        projects.add(data);
+      }
+      return projects;
     } on SocketException {
       throw NoInternetException();
     } on HttpException {
@@ -338,11 +345,12 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw FirebaseErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw FirebaseErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
+      //print(e);
       throw UnexpectedErrorException(message: 'An unexpected error occured');
     }
   }
@@ -373,7 +381,7 @@ class FirestoreDatabase {
   }
 
   Future<Project> updateProject(
-      {required String projectId, String? title, String? duration}) async {
+      {required String projectId, String? title, int? duration}) async {
     try {
       Map<String, dynamic> updatedData = {
         if (title != null) 'title': title,
@@ -404,24 +412,23 @@ class FirestoreDatabase {
   }
 
   Future<void> deleteProject(String projectId) async {
-    
-  final tasksCollection = FirebaseFirestore.instance
-      .collection('projects')
-      .doc(projectId)
-      .collection('tasks');
-  try {
-  // Fetch all tasks and delete them
-  final tasksSnapshot = await tasksCollection.get();
-  for (var taskDoc in tasksSnapshot.docs) {
-    await taskDoc.reference.delete();
-  }
-  
-  // Delete the project document
-  await FirebaseFirestore.instance
-      .collection('projects')
-      .doc(projectId)
-      .delete();
-} on SocketException {
+    final tasksCollection = FirebaseFirestore.instance
+        .collection('projects')
+        .doc(projectId)
+        .collection('tasks');
+    try {
+      // Fetch all tasks and delete them
+      final tasksSnapshot = await tasksCollection.get();
+      for (var taskDoc in tasksSnapshot.docs) {
+        await taskDoc.reference.delete();
+      }
+
+      // Delete the project document
+      await FirebaseFirestore.instance
+          .collection('projects')
+          .doc(projectId)
+          .delete();
+    } on SocketException {
       throw NoInternetException();
     } on HttpException {
       throw SomethingWentWrongException();

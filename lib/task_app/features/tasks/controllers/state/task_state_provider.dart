@@ -99,12 +99,14 @@ class TaskStateProvider extends ChangeNotifier {
       final taskIndex = _tasks.indexWhere((task) => task.taskId == taskId);
       if (taskIndex == -1) return;
       //fields to update
-      Map<String, dynamic> fields = {
-        'description': description,
-        'title': title
-      };
-      await _taskServiceProvider.editTask(
-          projectId: projectId, taskId: taskId, fields: fields);
+
+      final newTask = await _taskServiceProvider.editTask(
+          projectId: projectId,
+          taskId: taskId,
+          title: title,
+          description: description);
+      _tasks[taskIndex] = newTask;
+
       setEditingStatus(false);
       _errorMessage = null;
       notifyListeners();

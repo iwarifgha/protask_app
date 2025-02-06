@@ -11,11 +11,11 @@ class AuthStateProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  bool _isSignedIn = false;
-  bool get isSignedIn => _isSignedIn;
+  // bool _isSignedIn = false;
+  // bool get isSignedIn => _isSignedIn;
 
-  bool _hasOnboarded = false;
-  bool get hasOnboarded => _hasOnboarded;
+  // bool _hasOnboarded = false;
+  // bool get hasOnboarded => _hasOnboarded;
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
@@ -25,29 +25,24 @@ class AuthStateProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> checkOnboardStatus() async {
-    _hasOnboarded = await _userPreferences.getOnboardState();
-    _isSignedIn = await _userPreferences.getSignedInState();
-    notifyListeners();
-  }
+  // Future<void> getOnboardAndSignedInState() async {
+  //   _hasOnboarded = await _userPreferences.getOnboardState();
+  //   _isSignedIn = await _userPreferences.getSignedInState();
+  //   notifyListeners();
+  // }
 
-  Future<void> setSignedInStateAsTrue() async {
-    final signInState = await _userPreferences.setSignedInStateAsTrue();
-    _isSignedIn = signInState;
-    notifyListeners();
-  }
 
-  Future<void> setSignedInStateAsFalse() async {
-    final signInState = await _userPreferences.setSignedInStateAsFalse();
-    _isSignedIn = signInState;
-    notifyListeners();
-  }
+  // Future<void> setSignedInState(bool value) async {
+  //   final signInState = await _userPreferences.setSignedInState(value);
+  //   _isSignedIn = signInState;
+  //   notifyListeners();
+  // }
 
-  Future<void> setOnboardedState() async {
-    final onBoardState = await _userPreferences.setOnboardedState();
-    _hasOnboarded = onBoardState;
-    notifyListeners();
-  }
+  // Future<void> setOnboardedState() async {
+  //   final onBoardState = await _userPreferences.setOnboardedState();
+  //   _hasOnboarded = onBoardState;
+  //   notifyListeners();
+  // }
 
   void clearError() {
     _errorMessage = null;
@@ -73,7 +68,7 @@ class AuthStateProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> signIn({required String email, required String password}) async {
+  Future<UserProfile?> signIn({required String email, required String password}) async {
     _setLoading(true);
     try {
       await Future.delayed(Duration(milliseconds: 500));
@@ -82,7 +77,7 @@ class AuthStateProvider extends ChangeNotifier {
     } catch (e) {
       final errorMessage = handleError(e);
       _errorMessage = errorMessage;
-      return false;
+      return null;
     } finally {
       _setLoading(false);
     }

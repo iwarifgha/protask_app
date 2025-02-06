@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
-import 'package:task_app/task_app/features/projects/model/project/projects_model.dart';
 import 'package:task_app/task_app/features/projects/view/project_details_screen.dart';
+import 'package:task_app/task_app/services/data/pref/user_pref.dart';
+import 'package:task_app/task_app/utils/functions/error_handler.dart';
 import 'package:task_app/task_app/utils/widgets/project_tile.dart';
 import 'package:task_app/task_app/utils/widgets/protask_drawer.dart';
 import 'package:task_app/task_app/utils/widgets/protask_icon_button.dart';
@@ -24,16 +25,27 @@ class MyProjectsView extends StatefulWidget {
 
 class _MyProjectsViewState extends State<MyProjectsView> {
   bool loading = false;
+  final pref = UserPreferences();
 
   @override
   void initState() {
-    setState(() {
-      //context.read<ProjectsStateProvider>().fetchProjects();
-    });
+    _fetchProjects();
+    setState(() {});
     super.initState();
   }
 
- 
+  _fetchProjects() async {
+    context.read<ProjectsStateProvider>().fetchProjects();
+  }
+
+  _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          content: ErrorNotifier(message: message)),
+    );
+  }
 
   _signOut() async {
     final state = context.read<AuthStateProvider>();
@@ -46,7 +58,8 @@ class _MyProjectsViewState extends State<MyProjectsView> {
     try {
       final signedOut = await state.signOut();
       if (signedOut == true) {
-        await state.setSignedInStateAsFalse();
+        pref.setSignedInState(false);
+        // await state.setSignedInStateAsFalse();
         setState(() {
           loading = false;
         });
@@ -74,53 +87,71 @@ class _MyProjectsViewState extends State<MyProjectsView> {
       ),
       builder: (context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.80,
+          height: MediaQuery.of(context).size.height * 0.60,
           padding: EdgeInsets.all(16),
-          child: Column(
-            spacing: 8,
-            children: [
-              Text("Add Project",
-                  style: Theme.of(context).textTheme.titleLarge),
-              SizedBox(height: 10),
-              ProtaskTextField(
-                  label: 'Title of project', controller: titleController),
-              ProtaskTextField(
+          child: SingleChildScrollView(
+            child: Column(
+              spacing: 8,
+              children: [
+                Text("Add Project",
+                    style: Theme.of(context).textTheme.titleLarge),
+                SizedBox(height: 10),
+                ProtaskTextField(
+                  label: 'Title of project',
+                  controller: titleController,
+                  validator: (val) {
+                    val = titleController.text;
+                    return val.isNotEmpty;
+                  },
+                ),
+                ProtaskTextField(
                   label: 'Estimated duration (in days)',
-                  controller: durationController),
-              SizedBox(height: 10),
-              Container(
-                height: 200,
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(12)),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    maxLines: null,
-                    controller: goalController,
-                    decoration: InputDecoration(border: InputBorder.none),
+                  controller: durationController,
+                  validator: (val) {
+                    val = durationController.text;
+                    return val.isNotEmpty;
+                  },
+                ),
+                SizedBox(height: 10),
+                Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      maxLines: null,
+                      controller: goalController,
+                      decoration: InputDecoration(border: InputBorder.none),
+                    ),
                   ),
                 ),
-              ),
-              ProtaskIconTextButton(
-                icon: Icons.add,
-                text: 'Add Project',
-                onPressed: () {
-                  String title = titleController.text.trim();
-                  String goal = goalController.text.trim();
-                  int duration = int.tryParse(durationController.text) ?? 0;
+                ProtaskIconTextButton(
+                  icon: Icons.add,
+                  text: 'Add Project',
+                  onPressed: () {
+                    String title = titleController.text.trim();
+                    String goal = goalController.text.trim();
+                    int duration = int.tryParse(durationController.text) ?? 0;
 
-                  if (title.isNotEmpty && goal.isNotEmpty) {
-                    context.read<ProjectsStateProvider>().addProject(
-                        title: title,
-                        duration: duration,
-                        goal: goal,
-                        timeCreated: DateTime.now().toString());
-                    Navigator.pop(context); // Close the modal
-                  }
-                },
-              )
-            ],
+                    if (title.isNotEmpty && goal.isNotEmpty) {
+                      try {
+                        context.read<ProjectsStateProvider>().addProject(
+                            title: title,
+                            duration: duration,
+                            goal: goal,
+                            timeCreated: DateTime.now().toString());
+                        Navigator.pop(context);
+                      } on Exception catch (e) {
+                        final mesg = handleError(e);
+                        _showErrorSnackbar(mesg);
+                      }
+                    }
+                  },
+                )
+              ],
+            ),
           ),
         );
       },
@@ -144,7 +175,7 @@ class _MyProjectsViewState extends State<MyProjectsView> {
                   onPressed: () {
                     Scaffold.of(context).openEndDrawer();
                   },
-                  icon: Icon(Icons.menu_outlined));
+                  icon: Icon(Icons.menu_outlined,));
             })
           ]),
       endDrawer: ProtaskAppDrawer(),
@@ -166,24 +197,29 @@ class _MyProjectsViewState extends State<MyProjectsView> {
           ],
         ),
         child: projects.isEmpty
-            ? const Center(
+            ? Center(
                 child: Text('You have no projects yet'),
               )
-            : ListView.builder(
-                itemCount: projects.length,
-                //projects.length,
-                itemBuilder: (context, index) {
-                  final project = projects[index];
-                  return ProjectTile(
-                    project: project,
-                    onTap: () =>
-                        context.go(ProjectDetailsView.path, extra: project),
-                  );
-                }),
+            : errorMessage != null
+                ? ErrorNotifier(message: errorMessage)
+                : ListView.builder(
+                    itemCount: projects.length,
+                    //projects.length,
+                    itemBuilder: (context, index) {
+                      final project = projects[index];
+                      return ProjectTile(
+                        project: project,
+                        onTap: () =>
+                            context.go(ProjectDetailsView.path, extra: project),
+                      );
+                    }),
       ),
-      floatingActionButton: ProtaskIconButton(
-        icon: Icons.add,
-        onPressed: _showProjectSheet,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: ProtaskIconButton(
+          icon: Icons.add,
+          onPressed: _showProjectSheet,
+        ),
       ),
     );
   }

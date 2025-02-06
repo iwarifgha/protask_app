@@ -5,6 +5,7 @@ import 'package:task_app/task_app/features/authentication/controller/state/auth_
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
 import 'package:task_app/task_app/features/authentication/view/welcome.dart';
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
+import 'package:task_app/task_app/services/data/pref/user_pref.dart';
 import 'package:task_app/task_app/utils/widgets/loading_widget.dart';
 
 class SplashView extends StatefulWidget {
@@ -16,6 +17,8 @@ class SplashView extends StatefulWidget {
 }
 
 class _SplashViewState extends State<SplashView> {
+  final pref = UserPreferences();
+
   @override
   void initState() {
     super.initState();
@@ -30,14 +33,15 @@ class _SplashViewState extends State<SplashView> {
   }
 
   Future<void> _getOnboardInfo() async {
-    final state = context.read<AuthStateProvider>();
-    final hasOnboarded = state.hasOnboarded;
-    final isSignedIn = state.isSignedIn;
+    // final state = context.read<AuthStateProvider>();
+    final router = GoRouter.of(context);
+    final hasOnboarded = await pref.getOnboardState();
+    final isSignedIn = await pref.getSignedInState();
     hasOnboarded == false
-        ? context.go(WelcomeView.path)
+        ? router.go(WelcomeView.path)
         : hasOnboarded == true && isSignedIn == false
-            ? context.go(SignInView.path)
-            : context.go(MyProjectsView.path);
+            ? router.go(SignInView.path)
+            : router.go(MyProjectsView.path);
   }
 
   @override

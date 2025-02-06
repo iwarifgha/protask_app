@@ -22,18 +22,18 @@ class UserProfile extends UserProfileModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'user_id': userId,
-      'display_name': displayName,
+      'userId': userId,
+      'displayName': displayName,
       'email': email,
-      'created_at': joined,
+      'createdAt': joined,
     };
   }
 
   factory UserProfile.fromMap(Map<String, dynamic> map) {
     return UserProfile(
-      userId: map['user_id'] ?? '',
-      displayName: map['display_name'] ?? '',
-      joined: map['created_at'] ?? '',
+      userId: map['userId'] ?? '',
+      displayName: map['displayName'] ?? '',
+      joined: map['createdAt'] ?? '',
       email: map['email'] ?? '',
     );
   }

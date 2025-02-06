@@ -2,11 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:task_app/task_app/features/projects/controller/services/projects_service_provider.dart';
 import 'package:task_app/task_app/features/projects/model/project/projects_model.dart';
+import 'package:task_app/task_app/services/data/pref/user_pref.dart';
 import 'package:task_app/task_app/utils/functions/error_handler.dart';
+import 'package:uuid/uuid.dart';
 
 class ProjectsStateProvider with ChangeNotifier {
-  List<Project> _projects = [];
+  var uuid = Uuid();
+  final pref = UserPreferences();
 
+  List<Project> _projects = [];
   List<Project> get projects => _projects;
   final _projectServiceProvider = ProjectsServiceProvider();
 
@@ -28,13 +32,18 @@ class ProjectsStateProvider with ChangeNotifier {
       required String timeCreated}) async {
     try {
       _setLoading(true);
-      final project = await _projectServiceProvider.addProject(
+      final userId = await pref.getUserId();
+      final project = Project(
+          projectId: uuid.v4(),
+          userId: userId,
           title: title,
-          duration: duration,
           goal: goal,
-          timeCreated: timeCreated,
-          tasks: []);
-      _projects.add(project);
+          duration: duration,
+          allTasksCompleted: false,
+          timeCreated: timeCreated);
+      final newProject =
+          await _projectServiceProvider.addProject(project: project);
+      _projects.add(newProject);
       _errorMessage = null;
       notifyListeners();
     } catch (e) {
@@ -53,6 +62,7 @@ class ProjectsStateProvider with ChangeNotifier {
     } catch (e) {
       final errorMsg = handleError(e);
       _errorMessage = errorMsg;
+      notifyListeners();
     } finally {
       notifyListeners();
     }
@@ -73,14 +83,14 @@ class ProjectsStateProvider with ChangeNotifier {
   }
 
   Future<void> editProject(
-      {required String projectId, String? title, String? duration}) async {
+      {required String projectId, String? title, int? duration}) async {
     try {
       final projectIndex =
           _projects.indexWhere((project) => project.projectId == projectId);
       if (projectIndex == -1) return;
 
       final newProject = await _projectServiceProvider.editProject(
-          projectId: projectId, title: title, duration: duration);
+          projectId: projectId, title: title, duration: duration?.toInt());
       _projects[projectIndex] = newProject;
       _errorMessage = null;
       notifyListeners();

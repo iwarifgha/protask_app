@@ -30,26 +30,26 @@ class Task extends TaskModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'created_at': timeCreated,
+      'createdAt': timeCreated,
       'title': title,
       'description': description,
-      'start_date': Timestamp.fromDate(startDate),
-      'end_date': Timestamp.fromDate(endDate),
-      'task_id': taskId,
-      'is_completed': isCompleted,
-      'project_id': projectId
+      'startDate': Timestamp.fromDate(startDate),
+      'endDate': Timestamp.fromDate(endDate),
+      'taskId': taskId,
+      'isCompleted': isCompleted,
+      'projectId': projectId
     };
   }
 
-  factory Task.fromMap(Map<String, dynamic> map, {required String taskId}) {
+  factory Task.fromMap(Map<String, dynamic> map) {
     return Task(
-      projectId:map['project_id'] ,
-        taskId: taskId,
-        timeCreated: map['created_at'] ?? '',
+      projectId:map['projectId'] ,
+        taskId: map['taskId'],
+        timeCreated: map['createdAt'] ?? '',
         title: map['title'] ?? '',
         description: map['description'] ?? '',
-        startDate: (map['start_date'] as Timestamp).toDate(),
-        endDate: (map['end_date'] as Timestamp).toDate(),
-        isCompleted: map['is_completed'] ?? false);
+        startDate: (map['startDate'] as Timestamp).toDate(),
+        endDate: (map['endDate'] as Timestamp).toDate(),
+        isCompleted: map['isCompleted'] ?? false);
   }
 }

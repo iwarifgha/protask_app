@@ -3,11 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/controller/state/auth_state_provider.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
+import 'package:task_app/task_app/services/data/pref/user_pref.dart';
 import 'package:task_app/task_app/utils/widgets/protask_main_button.dart';
 
 class WelcomeView extends StatelessWidget {
   static const path = '/welcome';
-  const WelcomeView({super.key});
+  WelcomeView({super.key});
+  final pref = UserPreferences();
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +58,8 @@ class WelcomeView extends StatelessWidget {
             ProtaskButton(
               text: ' Get Started ',
               onTap: () {
-                state.setOnboardedState();
+                pref.setOnboardedState();
+                // state.setOnboardedState();
                 context.go(SignInView.path);
               },
             )

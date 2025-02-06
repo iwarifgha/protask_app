@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:task_app/task_app/features/tasks/model/task/task_model.dart';
 
 //Abstract class
@@ -9,7 +10,6 @@ abstract class ProjectsModel {
   final int duration;
   final String timeCreated;
   final bool allTasksCompleted;
-  final List<Task> tasks;
 
   ProjectsModel(
       {required this.timeCreated,
@@ -18,9 +18,7 @@ abstract class ProjectsModel {
       required this.title,
       required this.goal,
       required this.duration,
-      required this.tasks,
-      required this.allTasksCompleted
-      });
+      required this.allTasksCompleted});
 }
 
 //Project model
@@ -31,31 +29,28 @@ class Project extends ProjectsModel {
       required super.title,
       required super.goal,
       required super.duration,
-      required super.tasks,
       required super.timeCreated,
-      required super.allTasksCompleted
-      });
+      required super.allTasksCompleted});
 
   Map<String, dynamic> toMap() {
     return {
-      'project_id': projectId,
-      'user_id': userId,
+      'projectId': projectId,
+      'userId': userId,
       'title': title,
       'goal': goal,
       'duration': duration,
-      'created_at': timeCreated
+      'createdAt': timeCreated
     };
   }
 
   factory Project.fromMap(Map<String, dynamic> json) {
     return Project(
-        projectId: json['project_id'],
-        userId: json['time'],
+        projectId: json['projectId'] ?? '',
+        userId: json['userId'] ?? '',
         title: json['title'] ?? '',
-        goal: json['description'] ?? '',
-        duration: json['userId'] ?? 0,
-        timeCreated: json['created_at'] ?? '',
-        allTasksCompleted: json['all_tasks_completed'],
-        tasks: List<Task>.from(json['tasks']));
+        goal: json['goal'] ?? '',
+        duration: json['duration'] ?? 0,
+        timeCreated: json['createdAt'] ?? '',
+        allTasksCompleted: json['allTasksCompleted'] ?? false);
   }
 }

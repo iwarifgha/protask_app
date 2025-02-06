@@ -6,27 +6,160 @@ import 'package:task_app/task_app/features/projects/model/project/projects_model
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
 import 'package:task_app/task_app/features/tasks/controllers/state/task_state_provider.dart';
 import 'package:task_app/task_app/features/tasks/model/task/task_model.dart';
+import 'package:task_app/task_app/features/tasks/view/date_field.dart';
 import 'package:task_app/task_app/features/tasks/view/task_details.dart';
 import 'package:task_app/task_app/utils/functions/date_formatter.dart';
 import 'package:task_app/task_app/utils/widgets/protask_icon_text_button.dart';
 import 'package:task_app/task_app/utils/widgets/protask_text.dart';
+import 'package:task_app/task_app/utils/widgets/protask_text_field.dart';
 import 'package:uuid/uuid.dart';
 
-class ProjectDetailsView extends StatelessWidget {
+class ProjectDetailsView extends StatefulWidget {
   static const path = '/project_detials';
   final Project project;
 
   const ProjectDetailsView({super.key, required this.project});
 
+  @override
+  State<ProjectDetailsView> createState() => _ProjectDetailsViewState();
+}
+
+class _ProjectDetailsViewState extends State<ProjectDetailsView> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _durationController;
+  DateTime? _start;
+  DateTime? _end;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.project.title);
+    _durationController =
+        TextEditingController(text: widget.project.duration.toString());
+  }
+
+  _showMenu() {
+    showMenu(
+        context: context,
+        position: RelativeRect.fromDirectional(
+            textDirection: TextDirection.rtl,
+            start: 0,
+            top: 0,
+            end: 20,
+            bottom: 0),
+        items: [
+          PopupMenuItem(
+            padding: EdgeInsets.only(left: 25),
+            child: Text('Delete'),
+            onTap: () {
+              _deleteProject(
+                  projectId: widget.project.projectId, context: context);
+            },
+          ),
+          PopupMenuItem(
+            padding: EdgeInsets.only(left: 25),
+            child: Text('Edit'),
+            onTap: () {
+              _showEditDialog(context,
+                  titleController: _titleController,
+                  durationController: _durationController);
+            },
+          )
+        ]);
+  }
+
   _deleteProject({required BuildContext context, required String projectId}) {
     context.read<ProjectsStateProvider>().deleteProject(projectId);
   }
 
-  void showAddTaskModal(BuildContext context, String projectId) {
+  _showEditDialog(BuildContext context,
+      {required TextEditingController titleController,
+      required TextEditingController durationController}) {
+    final color = Color.fromARGB(255, 1, 141, 255);
+
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              backgroundColor: Colors.white,
+              title: Text('Edit Project'),
+              content: SingleChildScrollView(
+                child: SizedBox(
+                  height: 150,
+                  child: Column(children: [
+                    ProtaskTextField(
+                      label: 'Title',
+                      controller: titleController,
+                      validator: (val) {
+                        val = titleController.text;
+                        return val.isNotEmpty;
+                      },
+                    ),
+                    ProtaskTextField(
+                      label: 'Duration',
+                      controller: durationController,
+                      validator: (val) {
+                        val = durationController.text;
+                        return val.isNotEmpty;
+                      },
+                    ),
+                  ]),
+                ),
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(color: color),
+                    )),
+                TextButton(
+                    onPressed: () {
+                      context.read<ProjectsStateProvider>().editProject(
+                          projectId: widget.project.projectId,
+                          duration: int.tryParse(durationController.text) ,
+                          title: titleController.text);
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      'Save',
+                      style: TextStyle(color: color),
+                    )),
+              ]);
+        });
+  }
+
+  Future<void> _selectDate(BuildContext context,
+      {required bool isStart}) async {
+    DateTime? initialDate = isStart ? _start : _end;
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2025),
+    );
+    if (picked != null && picked != initialDate) {
+      setState(() {
+        if (isStart) {
+          _start = picked;
+        } else {
+          _end = picked;
+        }
+      });
+    }
+  }
+
+  void _showAddTaskModal(
+    BuildContext context, {
+    required String projectId,
+  }) {
     TextEditingController titleController = TextEditingController();
     TextEditingController descriptionController = TextEditingController();
-    DateTime? startTime;
-    DateTime? endTime;
+
     var uuid = Uuid();
     showModalBottomSheet(
       context: context,
@@ -50,50 +183,34 @@ class ProjectDetailsView extends StatelessWidget {
               TextField(
                   controller: descriptionController,
                   decoration: InputDecoration(labelText: "Description")),
-              ElevatedButton(
-                onPressed: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime(2030),
-                  );
-                  if (pickedDate != null) {
-                    startTime = pickedDate;
-                  }
-                },
-                child: Text("Pick Start Date"),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime(2030),
-                  );
-                  if (pickedDate != null) {
-                    endTime = pickedDate;
-                  }
-                },
-                child: Text("Pick End Date"),
-              ),
+              ProtaskDateField(
+                  onTap: () {
+                    _selectDate(context, isStart: true);
+                  },
+                  date: _start == null ? 'Choose date' : '${_start!.toLocal()}',
+                  name: 'Add start date'),
+              ProtaskDateField(
+                  onTap: () {
+                    _selectDate(context, isStart: true);
+                  },
+                  date: _start == null ? 'Choose date' : '${_start!.toLocal()}',
+                  name: 'Add end date'),
               SizedBox(height: 16),
               ProtaskIconTextButton(
                   icon: Icons.bolt,
                   text: 'Add task',
                   onPressed: () {
                     if (titleController.text.isNotEmpty &&
-                        startTime != null &&
-                        endTime != null) {
+                        _start != null &&
+                        _end != null) {
                       Provider.of<TaskStateProvider>(context, listen: false)
                           .addTask(
                               taskId: uuid.v4(),
                               projectId: projectId,
                               title: titleController.text.trim(),
                               description: descriptionController.text.trim(),
-                              startDate: startTime!,
-                              endDate: endTime!,
+                              startDate: _start!,
+                              endDate: _end!,
                               timeCreated: DateTime.now().toIso8601String());
                       Navigator.pop(context);
                     }
@@ -107,6 +224,7 @@ class ProjectDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //final color = Color.fromARGB(255, 56, 111, 156);
     return ChangeNotifierProvider(
       create: (_) => TaskStateProvider(),
       child: Scaffold(
@@ -125,26 +243,7 @@ class ProjectDetailsView extends StatelessWidget {
             actions: [
               IconButton(
                 icon: Icon(Icons.more_vert_outlined),
-                onPressed: () {
-                  showMenu(
-                      context: context,
-                      position: RelativeRect.fromDirectional(
-                          textDirection: TextDirection.rtl,
-                          start: 0,
-                          top: 0,
-                          end: 20,
-                          bottom: 0),
-                      items: [
-                        PopupMenuItem(
-                          padding: EdgeInsets.only(left: 25),
-                          child: Text('Delete'),
-                          onTap: () {
-                            _deleteProject(
-                                projectId: project.projectId, context: context);
-                          },
-                        )
-                      ]);
-                },
+                onPressed: _showMenu,
               )
             ],
             backgroundColor: Colors.white,
@@ -189,7 +288,7 @@ class ProjectDetailsView extends StatelessWidget {
                                 child: ProtaskCustomText(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w100,
-                                    text: project.title),
+                                    text: widget.project.title),
                               ),
                             ],
                           ),
@@ -200,7 +299,7 @@ class ProjectDetailsView extends StatelessWidget {
                               Icon(Icons.bolt_rounded),
                               Flexible(
                                 child: ProtaskCustomText(
-                                    fontSize: 18, text: project.goal),
+                                    fontSize: 18, text: widget.project.goal),
                               ),
                             ],
                           ),
@@ -212,7 +311,8 @@ class ProjectDetailsView extends StatelessWidget {
                               ProtaskCustomText(
                                   fontSize: 18,
                                   fontWeight: FontWeight.normal,
-                                  text: 'Duration:  ${project.duration} days '),
+                                  text:
+                                      'Duration:  ${widget.project.duration} days '),
                             ],
                           ),
                           Row(
@@ -263,7 +363,8 @@ class ProjectDetailsView extends StatelessWidget {
           floatingActionButton: ProtaskIconTextButton(
             icon: Icons.bolt,
             text: 'Add a task',
-            onPressed: () => showAddTaskModal(context, project.projectId),
+            onPressed: () =>
+                _showAddTaskModal(context, projectId: widget.project.projectId),
           )),
     );
   }

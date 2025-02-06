@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 class ProtaskTextField extends StatefulWidget {
   final String label;
   final TextEditingController controller;
-  final bool Function(String)? validator;
+  final bool Function(String) validator;
   final bool hideText;
 
   const ProtaskTextField(
       {super.key,
       required this.label,
       required this.controller,
-      this.validator,
+      required this.validator,
       this.hideText = false});
 
   @override
@@ -22,7 +22,7 @@ class ProtaskTextFieldState extends State<ProtaskTextField> {
 
   void _validateInput(String value) {
     setState(() {
-      borderColor = widget.validator!(value) ? Colors.blue : Colors.red;
+      borderColor = widget.validator(value) ? Colors.blue : Colors.red;
     });
   }
 

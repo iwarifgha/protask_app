@@ -53,13 +53,15 @@ class TaskServiceProvider {
     }
   }
 
-  Future<void> editTask(
+  Future<Task> editTask(
       {required String projectId,
       required String taskId,
-      required Map<String, dynamic> fields}) async {
+      String? title,
+      String? description 
+      }) async {
     try {
-      await _fireStoreDatabaseServiceProvider.editTask(
-          projectId: projectId, taskId: taskId, fieldsToUpdate: fields);
+      return await _fireStoreDatabaseServiceProvider.editTask(
+          projectId: projectId, taskId: taskId, title: title, description: description);
     } catch (e) {
       throw Exception(e.toString());
     }

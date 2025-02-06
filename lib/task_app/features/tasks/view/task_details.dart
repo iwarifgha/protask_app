@@ -54,25 +54,6 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
         ]);
   }
 
-  Future<void> _selectDate(BuildContext context,
-      {required bool isStart}) async {
-    DateTime initialDate = isStart ? _startDate : _endDate;
-    DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2025),
-    );
-    if (picked != null && picked != initialDate) {
-      setState(() {
-        if (isStart) {
-          _startDate = picked;
-        } else {
-          _endDate = picked;
-        }
-      });
-    }
-  }
 
   Widget _indicator() {
     return SizedBox(
@@ -176,7 +157,7 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
                           child: ProtaskCustomText(
                               fontSize: 18,
                               fontWeight: FontWeight.normal,
-                              text: 'Ending on:  ${formatDate(task.endDate)} '),
+                              text: 'Will end on:  ${formatDate(task.endDate)} '),
                         ),
                       ],
                     ),

@@ -11,7 +11,7 @@ class ProjectTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8.0, right: 8, bottom: 5),
+      padding: const EdgeInsets.only(left: 8.0, right: 8, bottom: 5, top:5),
       child: InkWell(
         onTap: onTap,
         child: Container(
@@ -19,7 +19,7 @@ class ProjectTile extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade100),
+              border: Border.all(color: const Color.fromARGB(255, 219, 225, 230)),
               borderRadius: BorderRadius.circular(12)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,6 +27,7 @@ class ProjectTile extends StatelessWidget {
             //spacing: 5,
             children: [
               ProtaskCustomText(
+                color: const Color.fromARGB(255, 0, 140, 255),
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 text: project.title,

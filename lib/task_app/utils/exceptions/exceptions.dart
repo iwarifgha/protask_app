@@ -10,4 +10,10 @@ class UnexpectedErrorException implements Exception {
   UnexpectedErrorException({required this.message});
 }
 
+class FirebaseErrorException implements Exception {
+  final String message;
+
+  FirebaseErrorException({required this.message});
+}
+class NullElementException implements Exception{}
 class UserNotFoundException implements Exception {} 

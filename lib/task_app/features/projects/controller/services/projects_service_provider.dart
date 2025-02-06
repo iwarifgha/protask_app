@@ -1,34 +1,20 @@
 import 'package:task_app/task_app/features/projects/model/project/projects_model.dart';
-import 'package:task_app/task_app/features/tasks/model/task/task_model.dart';
 import 'package:task_app/task_app/services/api/firebase/auth/firebase_auth_service.dart';
 import 'package:task_app/task_app/services/api/firebase/firestore/firestore_database_service.dart';
+import 'package:task_app/task_app/services/data/pref/user_pref.dart';
 import 'package:uuid/uuid.dart';
 
 class ProjectsServiceProvider {
   final _firebaseAuthProvider = FirebaseAuthService();
   var uuid = Uuid();
+  final pref = UserPreferences();
   final _fireStoreDatabaseServiceProvider = FirestoreDatabase();
 
-  Future<Project> addProject(
-      {required String title,
-      required int duration,
-      required String goal,
-      required String timeCreated,
-      required List<Task> tasks}) async {
-    final currentUser = _firebaseAuthProvider.getUser();
-
-    final project = Project(
-        projectId: uuid.v4(),
-        userId: currentUser.uid,
-        title: title,
-        goal: goal,
-        duration: duration,
-        tasks: tasks,
-        allTasksCompleted: false,
-        timeCreated: timeCreated);
+  Future<Project> addProject({required Project project}) async {
     try {
-      await _fireStoreDatabaseServiceProvider.addProject(project: project);
-      return project;
+      final newProject =
+          await _fireStoreDatabaseServiceProvider.addProject(project: project);
+      return newProject;
     } catch (e) {
       throw Exception(e);
     }
@@ -57,10 +43,10 @@ class ProjectsServiceProvider {
   }
 
   Future<Project> editProject(
-      {required String projectId, String? title, String? duration}) async {
+      {required String projectId, String? title, int? duration}) async {
     try {
       final project = await _fireStoreDatabaseServiceProvider.updateProject(
-          projectId: projectId, title: title, duration: duration);
+          projectId: projectId, title: title, duration: duration?.toInt());
       return project;
     } catch (e) {
       throw Exception(e);

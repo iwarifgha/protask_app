@@ -57,45 +57,51 @@ class _SignUpViewState extends State<SignUpView> {
         title: const Text('Sign up for a free account'),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(top: 15.0, left: 15, right: 15),
-        child: Column(
-          spacing: 18,
-          children: [
-            ProtaskTextField(
-              label: 'Username',
-              controller: _displayNameController,
-            ),
-            ProtaskTextField(
-              label: 'Email',
-              controller: _emailController,
-              validator: (email) {
-                email = _emailController.text;
-                return passwordValidator(email);
-              },
-            ),
-            ProtaskTextField(
-              label: 'Password',
-              controller: _passwordController,
-              hideText: true,
-              validator: (pass) {
-                pass = _passwordController.text;
-                return passwordValidator(pass);
-              },
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                    onPressed: () {
-                      context.go(SignInView.path);
-                    },
-                    child: ProtaskCustomText(fontSize: 17, text: 'Sign In')),
-                ProtaskIconButton(
-                    icon: Icons.arrow_forward, onPressed: () => _signUp())
-              ],
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 15.0, left: 15, right: 15),
+          child: Column(
+            spacing: 18,
+            children: [
+              ProtaskTextField(
+                label: 'Username',
+                controller: _displayNameController,
+                validator: (val) {
+                  val = _displayNameController.text;
+                  return val.isNotEmpty;
+                },
+              ),
+              ProtaskTextField(
+                label: 'Email',
+                controller: _emailController,
+                validator: (email) {
+                  email = _emailController.text;
+                  return passwordValidator(email);
+                },
+              ),
+              ProtaskTextField(
+                label: 'Password',
+                controller: _passwordController,
+                hideText: true,
+                validator: (pass) {
+                  pass = _passwordController.text;
+                  return passwordValidator(pass);
+                },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                      onPressed: () {
+                        context.go(SignInView.path);
+                      },
+                      child: ProtaskCustomText(fontSize: 17, text: 'Sign In')),
+                  ProtaskIconButton(
+                      icon: Icons.arrow_forward, onPressed: () => _signUp())
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
