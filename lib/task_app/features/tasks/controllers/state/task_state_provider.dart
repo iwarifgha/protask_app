@@ -21,8 +21,7 @@ class TaskStateProvider extends ChangeNotifier {
   bool _isAllTasksComplete = false;
   bool get isAllTasksComplete => _isAllTasksComplete;
 
-  int _projectDuration = 0;
-  int get projectDuration => _projectDuration;
+  
 
   _setLoading(bool value) {
     _isLoading = value;
@@ -55,6 +54,7 @@ class TaskStateProvider extends ChangeNotifier {
           projectId: projectId);
 
       _tasks.add(task);
+      await _autoCalculateProjectDurationFromTaskDates(projectId: projectId);
       _errorMessage = null;
       notifyListeners();
     } catch (e) {
@@ -157,14 +157,13 @@ class TaskStateProvider extends ChangeNotifier {
     }
   }
 
-  Future<int> _autoCalculateProjectDurationFromTaskDates(
+  Future<void> _autoCalculateProjectDurationFromTaskDates(
       {required String projectId}) async {
     try {
       final duration = await _taskServiceProvider
           .autoCalculateDurationFromTaskDates(projectId: projectId);
-      _projectDuration = duration;
-      return _projectDuration;
-    } catch (e) {
+      print(duration);
+     } catch (e) {
       throw Exception();
     }
   }

@@ -77,7 +77,6 @@ class _MyProjectsViewState extends State<MyProjectsView> {
 
   void _showProjectSheet() {
     final titleController = TextEditingController();
-    final durationController = TextEditingController();
     final goalController = TextEditingController();
     showModalBottomSheet(
       context: context,
@@ -104,14 +103,6 @@ class _MyProjectsViewState extends State<MyProjectsView> {
                     return val.isNotEmpty;
                   },
                 ),
-                ProtaskTextField(
-                  label: 'Estimated duration (in days)',
-                  controller: durationController,
-                  validator: (val) {
-                    val = durationController.text;
-                    return val.isNotEmpty;
-                  },
-                ),
                 SizedBox(height: 10),
                 Container(
                   height: 200,
@@ -133,13 +124,12 @@ class _MyProjectsViewState extends State<MyProjectsView> {
                   onPressed: () {
                     String title = titleController.text.trim();
                     String goal = goalController.text.trim();
-                    int duration = int.tryParse(durationController.text) ?? 0;
+                    // int duration = int.tryParse(durationController.text) ?? 0;
 
                     if (title.isNotEmpty && goal.isNotEmpty) {
                       try {
                         context.read<ProjectsStateProvider>().addProject(
                             title: title,
-                            duration: duration,
                             goal: goal,
                             timeCreated: DateTime.now().toString());
                         Navigator.pop(context);

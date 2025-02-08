@@ -251,7 +251,7 @@ class _ProjectDetailsViewState extends State<ProjectDetailsView> {
                                 fontSize: 18,
                                 fontWeight: FontWeight.normal,
                                 text:
-                                    'Duration:  ${taskProvider.projectDuration} days '),
+                                    'Duration:  ${widget.project.duration} days '),
                           ],
                         ),
                         Row(
