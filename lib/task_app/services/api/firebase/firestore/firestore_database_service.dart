@@ -30,12 +30,12 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -62,12 +62,12 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -91,12 +91,13 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      print(e);
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -104,11 +105,13 @@ class FirestoreDatabase {
       {required String projectId,
       required String taskId,
       String? title,
-      String? description}) async {
+      String? description,
+      bool? isComplete}) async {
     try {
       Map<String, dynamic> fields = {
         if (description != null) 'description': description,
-        if (title != null) 'title': title
+        if (title != null) 'title': title,
+        if (isComplete != null) 'isCompleted': isComplete
       };
 
       await FirebaseFirestore.instance
@@ -125,12 +128,12 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -145,12 +148,93 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
+    }
+  }
+
+  Future<int> calculateProjectDuration(String projectId) async {
+    try {
+      final snapshot = await _fireStore
+          .collection('tasks')
+          .where('projectId', isEqualTo: projectId)
+          .where('isCompleted', isEqualTo: false)
+          .get();
+
+      final tasks = snapshot.docs.map((doc) {
+        final data = doc.data();
+        return Task.fromMap(
+          data,
+        );
+      }).toList();
+
+      if (tasks.isEmpty) return 0;
+
+      List<DateTime> startTimes = [];
+      List<DateTime> endTimes = [];
+
+      for (var task in tasks) {
+        startTimes.add(DateTime.parse(task.startDate));
+        endTimes.add(DateTime.parse(task.endDate));
+      }
+
+      DateTime minStart = startTimes.reduce((a, b) => a.isBefore(b) ? a : b);
+      DateTime maxEnd = endTimes.reduce((a, b) => a.isAfter(b) ? a : b);
+      final duration = maxEnd.difference(minStart).inDays + 1;
+      //update duration in firestore.
+      final project =
+          await updateProject(projectId: projectId, duration: duration);
+      return project.duration;
+    } catch (e) {
+      throw Exception();
+    }
+  }
+
+  Future<Task> markTaskComplete(
+      {required String taskId, required String projectId}) async {
+    try {
+      final task = await getSingleTask(projectId: projectId, taskId: taskId);
+
+      if (task.isCompleted == false) {
+        final task = await editTask(
+            projectId: projectId, taskId: taskId, isComplete: true);
+        return task;
+      }
+      throw GeneralErrorException(message: 'Task already completed');
+    } on SocketException {
+      throw NoInternetException();
+    } on HttpException {
+      throw SomethingWentWrongException();
+    } on FormatException {
+      throw BadResponseException();
+    } on FirebaseAuthException {
+      throw GeneralErrorException(message: 'No user logged in');
+    } on FirebaseException catch (e) {
+      throw GeneralErrorException(
+          message: 'An unexpected error occured, see here ${e.toString()}');
+    } catch (e) {
+      throw GeneralErrorException(message: 'An unexpected error occured');
+    }
+  }
+
+  Future<bool> checkIfAllTasksInAProjectComplete(
+      {required String projectId}) async {
+    try {
+      QuerySnapshot taskSnapshot = await _fireStore
+          .collection('tasks')
+          .where('projectId', isEqualTo: projectId)
+          .where('isCompleted', isEqualTo: false)
+          .get();
+
+      final isCompleted = taskSnapshot
+          .docs.isEmpty; // If no incomplete tasks, project is complete
+      return isCompleted;
+    } catch (e) {
+      throw Exception();
     }
   }
 
@@ -175,12 +259,12 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -200,12 +284,12 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -253,12 +337,12 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -284,12 +368,12 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -315,7 +399,7 @@ class FirestoreDatabase {
       throw FirebaseErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -351,7 +435,7 @@ class FirestoreDatabase {
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
       //print(e);
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -371,21 +455,25 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
   Future<Project> updateProject(
-      {required String projectId, String? title, int? duration}) async {
+      {required String projectId,
+      String? title,
+      int? duration,
+      bool? completed}) async {
     try {
       Map<String, dynamic> updatedData = {
         if (title != null) 'title': title,
         if (duration != null) 'duration': duration,
+        if (completed != null) 'allTaskCompleted': completed,
       };
 
       await _fireStore
@@ -402,12 +490,12 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -435,12 +523,27 @@ class FirestoreDatabase {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
+    }
+  }
+
+  Future<Project> markProjectAsComplete({required String projectId}) async {
+    try {
+      final project = await getSingleProject(projectId: projectId);
+
+      if (project.allTasksCompleted == false) {
+        final project =
+            await updateProject(projectId: projectId, completed: true);
+        return project;
+      }
+      throw GeneralErrorException(message: 'Project already completed');
+    } catch (e) {
+      throw Exception();
     }
   }
 }

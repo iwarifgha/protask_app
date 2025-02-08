@@ -21,8 +21,8 @@ class TaskDetailsView extends StatefulWidget {
 class _TaskDetailsViewState extends State<TaskDetailsView> {
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
-  late DateTime _startDate;
-  late DateTime _endDate;
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   @override
   void initState() {
@@ -44,16 +44,20 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
         items: [
           PopupMenuItem(
             padding: EdgeInsets.only(left: 25),
-            child: Text('Delete'),
+            child: Text('Refresh'),
             onTap: () {},
           ),
           PopupMenuItem(
               padding: EdgeInsets.only(left: 25),
-              child: Text('Edit'),
-              onTap: () {})
+              child: Text('Delete'),
+              onTap: () {
+                context.read<TaskStateProvider>().deleteTask(
+                    projectId: widget.task.projectId,
+                    taskId: widget.task.taskId);
+                context.go(TaskDetailsView.path);
+              })
         ]);
   }
-
 
   Widget _indicator() {
     return SizedBox(
@@ -62,7 +66,6 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
       child: CircularProgressIndicator(),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +92,11 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
                 state.isLoading == true
                     ? null
                     : state.isEditing == true
-                        ? state.setEditingStatus(false)
+                        ? state.editTask(
+                            taskId: task.taskId,
+                            projectId: task.projectId,
+                            title: _titleController.text,
+                            description: _descriptionController.text)
                         : _showMenu();
               },
             )
@@ -145,7 +152,7 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
                               fontSize: 18,
                               fontWeight: FontWeight.normal,
                               text:
-                                  'Starting on:  ${formatDate(task.startDate)} '),
+                                  'Starting on:  ${formatDate(DateTime.parse(task.startDate))} '),
                         ),
                       ],
                     ),
@@ -157,7 +164,8 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
                           child: ProtaskCustomText(
                               fontSize: 18,
                               fontWeight: FontWeight.normal,
-                              text: 'Will end on:  ${formatDate(task.endDate)} '),
+                              text:
+                                  'Will end on:  ${formatDate(DateTime.parse(task.endDate))} '),
                         ),
                       ],
                     ),

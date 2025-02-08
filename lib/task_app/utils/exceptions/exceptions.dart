@@ -4,10 +4,10 @@ class SomethingWentWrongException implements Exception {}
 
 class BadResponseException implements Exception {}
 
-class UnexpectedErrorException implements Exception {
+class GeneralErrorException implements Exception {
   final String message;
 
-  UnexpectedErrorException({required this.message});
+  GeneralErrorException({required this.message});
 }
 
 class FirebaseErrorException implements Exception {
@@ -15,5 +15,7 @@ class FirebaseErrorException implements Exception {
 
   FirebaseErrorException({required this.message});
 }
-class NullElementException implements Exception{}
-class UserNotFoundException implements Exception {} 
+
+class NullElementException implements Exception {}
+
+class UserNotFoundException implements Exception {}

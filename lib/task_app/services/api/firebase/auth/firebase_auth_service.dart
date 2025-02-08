@@ -25,15 +25,15 @@ class FirebaseAuthService {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException {
-      throw UnexpectedErrorException(message: 'No user logged in');
+      throw GeneralErrorException(message: 'No user logged in');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
       if (kDebugMode) {
         print('This is th error ${e.toString()}');
       }
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -58,13 +58,13 @@ class FirebaseAuthService {
         final user = userCredential.user;
         final userProfile = UserProfile(
             userId: user!.uid,
-            displayName: user.displayName ?? '',// no disply name enforced yet
+            displayName: user.displayName ?? '', // no disply name enforced yet
             email: user.email!,
             joined: user.metadata.creationTime!.toIso8601String());
         return userProfile;
       }
 
-      return throw UnexpectedErrorException(message: 'Could not sign you in..');
+      return throw GeneralErrorException(message: 'Could not sign you in..');
     } on SocketException {
       throw NoInternetException();
     } on HttpException {
@@ -81,7 +81,7 @@ class FirebaseAuthService {
       if (kDebugMode) {
         print('This is th error ${e.toString()}');
       }
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -119,16 +119,16 @@ class FirebaseAuthService {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An error occured while signing you up ${e.message}');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
       if (kDebugMode) {
         print('This is th error ${e.toString()}');
       }
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 
@@ -150,16 +150,16 @@ class FirebaseAuthService {
     } on FormatException {
       throw BadResponseException();
     } on FirebaseAuthException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An error occured while signing you up ${e.message}');
     } on FirebaseException catch (e) {
-      throw UnexpectedErrorException(
+      throw GeneralErrorException(
           message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
       if (kDebugMode) {
         print('This is th error ${e.toString()}');
       }
-      throw UnexpectedErrorException(message: 'An unexpected error occured');
+      throw GeneralErrorException(message: 'An unexpected error occured');
     }
   }
 }

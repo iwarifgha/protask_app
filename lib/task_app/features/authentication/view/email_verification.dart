@@ -8,6 +8,15 @@ class EmailVerificationView extends StatelessWidget {
   static const path = '/email_verifcation';
   const EmailVerificationView({super.key});
 
+  /*
+  verify
+  //check if email is verified
+  //if true, sign up with the email
+  //then go to sign in screen
+  //if false, show show dialog with message 'email not verified'
+  //
+  */ 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

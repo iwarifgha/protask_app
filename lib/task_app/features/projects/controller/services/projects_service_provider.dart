@@ -43,13 +43,28 @@ class ProjectsServiceProvider {
   }
 
   Future<Project> editProject(
-      {required String projectId, String? title, int? duration}) async {
+      {required String projectId,
+      String? title,
+      int? duration,
+      bool? completed}) async {
     try {
       final project = await _fireStoreDatabaseServiceProvider.updateProject(
-          projectId: projectId, title: title, duration: duration?.toInt());
+          projectId: projectId,
+          title: title,
+          duration: duration?.toInt(),
+          completed: completed);
       return project;
     } catch (e) {
       throw Exception(e);
+    }
+  }
+
+  Future<Project> markAsCompleteProject({required Project project}) async {
+    try {
+      return await _fireStoreDatabaseServiceProvider.markProjectAsComplete(
+          projectId: project.projectId);
+    } catch (e) {
+      throw Exception(e.toString());
     }
   }
 }

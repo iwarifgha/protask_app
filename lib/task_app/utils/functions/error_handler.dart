@@ -5,8 +5,8 @@ String handleError(dynamic error) {
     return ' You have no Internet connection ';
   } else if (error is SomethingWentWrongException) {
     return ' Something went wrong. Please try again ';
-  } else if (error is UnexpectedErrorException) {
-    return  error.message;
+  } else if (error is GeneralErrorException) {
+    return error.message;
   } else if (error is BadResponseException) {
     return ' Incorrect input. Please check and try again ';
   } else {

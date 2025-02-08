@@ -11,7 +11,7 @@ class ProjectTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8.0, right: 8, bottom: 5, top:5),
+      padding: const EdgeInsets.only(left: 8.0, right: 8, bottom: 5, top: 5),
       child: InkWell(
         onTap: onTap,
         child: Container(
@@ -19,8 +19,13 @@ class ProjectTile extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-              border: Border.all(color: const Color.fromARGB(255, 219, 225, 230)),
-              borderRadius: BorderRadius.circular(12)),
+              color: Colors.white,
+              //border:Border.all(color: const Color.fromARGB(255, 219, 225, 230)),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(color: Colors.grey.shade100, offset: Offset(3, 3)),
+                BoxShadow(color: Colors.grey.shade100, offset: Offset(-3, -3))
+              ]),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             //mainAxisSize: MainAxisSize.min,
