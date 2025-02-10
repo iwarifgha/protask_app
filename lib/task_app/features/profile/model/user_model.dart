@@ -14,11 +14,14 @@ abstract class UserProfileModel {
 
 //App User. This can be modified in future in case of new user features.
 class UserProfile extends UserProfileModel {
-  UserProfile(
-      {required super.userId,
-      required super.displayName,
-      required super.email,
-      required super.joined});
+  final bool isEmailVerified;
+  UserProfile({
+    required this.isEmailVerified,
+    required super.userId,
+    required super.displayName,
+    required super.email,
+    required super.joined,
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -26,15 +29,17 @@ class UserProfile extends UserProfileModel {
       'displayName': displayName,
       'email': email,
       'createdAt': joined,
+      'emailVerified': isEmailVerified
     };
   }
 
-  factory UserProfile.fromMap(Map<String, dynamic> map) {
+  factory UserProfile.fromMap(Map<String, dynamic> json) {
     return UserProfile(
-      userId: map['userId'] ?? '',
-      displayName: map['displayName'] ?? '',
-      joined: map['createdAt'] ?? '',
-      email: map['email'] ?? '',
+      userId: json['userId'] ?? '',
+      displayName: json['displayName'] ?? '',
+      joined: json['createdAt'] ?? '',
+      email: json['email'] ?? '', 
+      isEmailVerified:json['emailVerified']  ?? false,
     );
   }
 }

@@ -7,10 +7,17 @@ String handleError(dynamic error) {
     return ' Something went wrong. Please try again ';
   } else if (error is GeneralErrorException) {
     return error.message;
-  } else if (error is BadResponseException) {
+  } else if (error is FirebaseErrorException) {
+    return error.message;
+  }
+  else if (error is UserNotFoundException) {
+    return ' No user found ';
+  } else if (error is NullElementException) {
+    return ' This is an internal error ';
+  }
+   else if (error is BadResponseException) {
     return ' Incorrect input. Please check and try again ';
   } else {
-    print(error);
-    return 'Something bad happened, Please try again. ';
+     return ' Something bad happened, Please restart the app and try again. ';
   }
 }

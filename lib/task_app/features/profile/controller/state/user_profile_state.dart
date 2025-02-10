@@ -9,14 +9,14 @@ class UserProfileState extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  Future<UserProfile> getProfile({required String userId}) async {
+  Future<UserProfile?> getProfile({required String userId}) async {
     try {
       final user = await _userProfileServiceProvider.getProfile(userId: userId);
       return user;
     } catch (e) {
       final errorMsg = handleError(e);
       _errorMessage = errorMsg;
-      return UserProfile(userId: '', displayName: '', email: '', joined: '');
+      return null;
     } finally {
       notifyListeners();
     }

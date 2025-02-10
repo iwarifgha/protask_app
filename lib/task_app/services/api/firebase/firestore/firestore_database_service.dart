@@ -252,19 +252,8 @@ class FirestoreDatabase {
         // Add user data to Firestore
         await userDoc.set({user.toMap()});
       }
-    } on SocketException {
-      throw NoInternetException();
-    } on HttpException {
-      throw SomethingWentWrongException();
-    } on FormatException {
-      throw BadResponseException();
-    } on FirebaseAuthException {
-      throw GeneralErrorException(message: 'No user logged in');
-    } on FirebaseException catch (e) {
-      throw GeneralErrorException(
-          message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw GeneralErrorException(message: 'An unexpected error occured');
+      throw Exception();
     }
   }
 
@@ -277,19 +266,8 @@ class FirestoreDatabase {
         return UserProfile.fromMap(user);
       }
       throw Exception('User not found');
-    } on SocketException {
-      throw NoInternetException();
-    } on HttpException {
-      throw SomethingWentWrongException();
-    } on FormatException {
-      throw BadResponseException();
-    } on FirebaseAuthException {
-      throw GeneralErrorException(message: 'No user logged in');
-    } on FirebaseException catch (e) {
-      throw GeneralErrorException(
-          message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw GeneralErrorException(message: 'An unexpected error occured');
+      throw Exception();
     }
   }
 
@@ -329,20 +307,9 @@ class FirestoreDatabase {
 
       // Optionally: Reload Firebase Auth User
       await user.reload();
-      print('User details updated successfully');
-    } on SocketException {
-      throw NoInternetException();
-    } on HttpException {
-      throw SomethingWentWrongException();
-    } on FormatException {
-      throw BadResponseException();
-    } on FirebaseAuthException {
-      throw GeneralErrorException(message: 'No user logged in');
-    } on FirebaseException catch (e) {
-      throw GeneralErrorException(
-          message: 'An unexpected error occured, see here ${e.toString()}');
+       print('User details updated successfully');
     } catch (e) {
-      throw GeneralErrorException(message: 'An unexpected error occured');
+      throw Exception();
     }
   }
 
@@ -361,19 +328,8 @@ class FirestoreDatabase {
 
       //delete from firestore
       await userInFirestore.delete();
-    } on SocketException {
-      throw NoInternetException();
-    } on HttpException {
-      throw SomethingWentWrongException();
-    } on FormatException {
-      throw BadResponseException();
-    } on FirebaseAuthException {
-      throw GeneralErrorException(message: 'No user logged in');
-    } on FirebaseException catch (e) {
-      throw GeneralErrorException(
-          message: 'An unexpected error occured, see here ${e.toString()}');
     } catch (e) {
-      throw GeneralErrorException(message: 'An unexpected error occured');
+      throw Exception();
     }
   }
 

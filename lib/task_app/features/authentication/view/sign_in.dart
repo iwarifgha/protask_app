@@ -1,13 +1,15 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 //import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/controller/state/auth_state_provider.dart';
-import 'package:task_app/task_app/features/authentication/view/forgot_password.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_up.dart';
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
 import 'package:task_app/task_app/services/data/pref/user_pref.dart';
 import 'package:task_app/task_app/utils/functions/validators.dart';
+import 'package:task_app/task_app/utils/widgets/email_verify_dialog.dart';
+import 'package:task_app/task_app/utils/widgets/forgot_password_dialog.dart';
 import 'package:task_app/task_app/utils/widgets/protask_icon_button.dart';
 import 'package:task_app/task_app/utils/widgets/error_notifier.dart';
 import 'package:task_app/task_app/utils/widgets/loading_widget.dart';
@@ -28,6 +30,38 @@ class _SignInViewState extends State<SignInView> {
   final _passwordController = TextEditingController();
   final pref = UserPreferences();
 
+// bool isEmailVerified = false;
+
+//   _sendEmailVerification() {
+//         final messenger = ScaffoldMessenger.of(context);
+
+//     context.read<AuthStateProvider>().verifyEmail();
+//     messenger.showSnackBar(
+//         SnackBar(
+//             elevation: 0,
+//             backgroundColor: Colors.transparent,
+//             content: ErrorNotifier(message: 'Empty fields')),
+//       );
+//   }
+
+  _resetPassword() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return ForgotPasswordDialog();
+        });
+  }
+
+  _showVerifyDialog({required String email}) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return EmailVerifyDialog(
+            email: email,
+          );
+        });
+  }
+
   _login() async {
     final state = context.read<AuthStateProvider>();
     final router = GoRouter.of(context);
@@ -47,14 +81,21 @@ class _SignInViewState extends State<SignInView> {
             backgroundColor: Colors.transparent,
             content: ErrorNotifier(message: state.errorMessage!)),
       );
+      return;
     } else {
       final user = await state.signIn(
           email: _emailController.text, password: _passwordController.text);
+
       if (user != null) {
-        pref.setUserId(user.userId);
-        pref.setSignedInState(true);
-        // await state.setSignedInState(true);
-        router.go(MyProjectsView.path);
+        final verified = user.isEmailVerified;
+
+        if (verified == false) {
+          _showVerifyDialog(email: user.email);
+        } else {
+          pref.setUserId(user.userId);
+          pref.setSignedInState(true);
+          router.go(MyProjectsView.path);
+        }
       }
       return;
     }
@@ -88,7 +129,7 @@ class _SignInViewState extends State<SignInView> {
                 controller: _emailController,
                 validator: (email) {
                   email = _emailController.text.trim();
-                  return emailValidator(email);
+                  return  EmailValidator.validate(email);
                 },
               ),
               Column(
@@ -105,9 +146,7 @@ class _SignInViewState extends State<SignInView> {
                   Align(
                     alignment: Alignment.bottomRight,
                     child: InkWell(
-                      onTap: () {
-                        context.go(ForgotPasswordView.path);
-                      },
+                      onTap: _resetPassword,
                       child: ProtaskCustomText(
                         color: Colors.grey,
                         text: 'Forgot Password',

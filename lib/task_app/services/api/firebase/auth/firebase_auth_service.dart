@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:task_app/task_app/features/profile/model/user_model.dart';
 import 'package:task_app/task_app/services/api/firebase/firestore/firestore_database_service.dart';
+import 'package:task_app/task_app/utils/exceptions/exception_handler.dart';
 import 'package:task_app/task_app/utils/exceptions/exceptions.dart';
 
 class FirebaseAuthService {
@@ -12,45 +10,27 @@ class FirebaseAuthService {
 
   //GET CURRENT USER
   User getUser() {
-    try {
+    return handleExceptionSync(() {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         return user;
       }
       throw UserNotFoundException();
-    } on SocketException {
-      throw NoInternetException();
-    } on HttpException {
-      throw SomethingWentWrongException();
-    } on FormatException {
-      throw BadResponseException();
-    } on FirebaseAuthException {
-      throw GeneralErrorException(message: 'No user logged in');
-    } on FirebaseException catch (e) {
-      throw GeneralErrorException(
-          message: 'An unexpected error occured, see here ${e.toString()}');
-    } catch (e) {
-      if (kDebugMode) {
-        print('This is th error ${e.toString()}');
-      }
-      throw GeneralErrorException(message: 'An unexpected error occured');
-    }
+    });
   }
 
   //GET AUTHENTICATION STATUS OF USER
   Future<User?> getAuthState() async {
-    try {
+    return handleExceptionSync(() async {
       final user = await _auth.authStateChanges().first;
       return user;
-    } catch (e) {
-      throw Exception(e);
-    }
+    });
   }
 
   //SIGN IN
   Future<UserProfile> signIn(
       {required String email, required String password}) async {
-    try {
+    return handleExceptionSync(() async {
       final userCredential = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
 
@@ -60,38 +40,21 @@ class FirebaseAuthService {
             userId: user!.uid,
             displayName: user.displayName ?? '', // no disply name enforced yet
             email: user.email!,
-            joined: user.metadata.creationTime!.toIso8601String());
+            joined: user.metadata.creationTime!.toIso8601String(),
+            isEmailVerified: user.emailVerified);
         return userProfile;
       }
-
       return throw GeneralErrorException(message: 'Could not sign you in..');
-    } on SocketException {
-      throw NoInternetException();
-    } on HttpException {
-      throw SomethingWentWrongException();
-    } on FormatException {
-      throw BadResponseException();
-    } on FirebaseAuthException catch (e) {
-      throw FirebaseErrorException(
-          message: 'An error occured while signing in..${e.message}');
-    } on FirebaseException catch (e) {
-      throw FirebaseErrorException(
-          message: 'An unexpected error occured, see here ${e.toString()}');
-    } catch (e) {
-      if (kDebugMode) {
-        print('This is th error ${e.toString()}');
-      }
-      throw GeneralErrorException(message: 'An unexpected error occured');
-    }
+    });
   }
 
   //SIGN UP
-  Future<UserProfile> signUp({
+  Future<void> signUp({
     required String email,
     required String password,
     required String displayName,
   }) async {
-    try {
+    return handleExceptionSync(() async {
       //Create a user in firebase auth
       final userCredential = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
@@ -107,35 +70,33 @@ class FirebaseAuthService {
           userId: user!.uid,
           displayName: user.displayName!,
           email: user.email!,
-          joined: user.metadata.creationTime!.toIso8601String());
+          joined: user.metadata.creationTime!.toIso8601String(),
+          isEmailVerified: user.emailVerified);
 
       //Create the user profile in firestore
       await _firestore.createUserProfile(user: userProfile);
-      return userProfile;
-    } on SocketException {
-      throw NoInternetException();
-    } on HttpException {
-      throw SomethingWentWrongException();
-    } on FormatException {
-      throw BadResponseException();
-    } on FirebaseAuthException catch (e) {
-      throw GeneralErrorException(
-          message: 'An error occured while signing you up ${e.message}');
-    } on FirebaseException catch (e) {
-      throw GeneralErrorException(
-          message: 'An unexpected error occured, see here ${e.toString()}');
-    } catch (e) {
-      if (kDebugMode) {
-        print('This is th error ${e.toString()}');
-      }
-      throw GeneralErrorException(message: 'An unexpected error occured');
-    }
+    });
   }
+
+  //VERIFY EMAIL
+  Future<void> verifyEmail({required User user}) async {
+    return handleExceptionSync(() async {
+      await user.sendEmailVerification();
+    });
+  }
+
+  //FORGOT PASS
+  Future<void> forgotPassword({required String email}) async {
+    return handleExceptionSync(() async {
+      await _auth.sendPasswordResetEmail(email: email);
+    });
+  }
+ 
 
   //SIGN OUT
 
   Future<bool> signOut() async {
-    try {
+    return handleExceptionSync(() async {
       await _auth.signOut();
       final user = _auth.currentUser;
       if (user == null) {
@@ -143,23 +104,6 @@ class FirebaseAuthService {
         return true;
       }
       return false;
-    } on SocketException {
-      throw NoInternetException();
-    } on HttpException {
-      throw SomethingWentWrongException();
-    } on FormatException {
-      throw BadResponseException();
-    } on FirebaseAuthException catch (e) {
-      throw GeneralErrorException(
-          message: 'An error occured while signing you up ${e.message}');
-    } on FirebaseException catch (e) {
-      throw GeneralErrorException(
-          message: 'An unexpected error occured, see here ${e.toString()}');
-    } catch (e) {
-      if (kDebugMode) {
-        print('This is th error ${e.toString()}');
-      }
-      throw GeneralErrorException(message: 'An unexpected error occured');
-    }
+    });
   }
 }

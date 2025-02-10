@@ -1,6 +1,5 @@
 import 'package:go_router/go_router.dart';
 import 'package:task_app/task_app/features/authentication/view/email_verification.dart';
-import 'package:task_app/task_app/features/authentication/view/forgot_password.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_up.dart';
 import 'package:task_app/task_app/features/authentication/view/splash.dart';
@@ -23,9 +22,6 @@ final GoRouter appRoutes = GoRouter(
     GoRoute(
         path: MyProjectsView.path,
         builder: (context, state) => MyProjectsView()),
-    GoRoute(
-        path: ForgotPasswordView.path,
-        builder: (context, state) => ForgotPasswordView()),
     GoRoute(
         path: EmailVerificationView.path,
         builder: (context, state) => EmailVerificationView()),
