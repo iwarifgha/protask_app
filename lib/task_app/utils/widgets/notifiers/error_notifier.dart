@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:task_app/task_app/utils/widgets/protask_text.dart';
+
+import '../components/text/protask_text.dart';
 
 class ErrorNotifier extends StatelessWidget {
   final String message;
@@ -20,3 +21,5 @@ class ErrorNotifier extends StatelessWidget {
     );
   }
 }
+
+

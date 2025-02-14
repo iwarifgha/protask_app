@@ -4,14 +4,17 @@ import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/controller/state/auth_state_provider.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
 import 'package:task_app/task_app/utils/functions/validators.dart';
-import 'package:task_app/task_app/utils/widgets/error_notifier.dart';
-import 'package:task_app/task_app/utils/widgets/loading_widget.dart';
-import 'package:task_app/task_app/utils/widgets/protask_icon_button.dart';
-import 'package:task_app/task_app/utils/widgets/protask_text.dart';
-import 'package:task_app/task_app/utils/widgets/protask_text_field.dart';
+import 'package:task_app/task_app/utils/widgets/notifiers/error_notifier.dart';
+import 'package:task_app/task_app/utils/widgets/components/loaders/loading_widget.dart';
+
+import '../../../utils/widgets/components/buttons/protask_icon_button.dart';
+import '../../../utils/widgets/components/text/protask_text.dart';
+import '../../../utils/widgets/components/text/protask_text_field.dart';
+import '../../../utils/widgets/notifiers/success_notifier.dart';
 
 class SignUpView extends StatefulWidget {
   static const path = '/sign_up';
+
   const SignUpView({super.key});
 
   @override
@@ -36,31 +39,19 @@ class _SignUpViewState extends State<SignUpView> {
       );
       return;
     } else {
-      try {
-        final signedUp = await state.signUp(
-            email: _emailController.text,
-            password: _passwordController.text,
-            displayName: _displayNameController.text);
-
-        if (signedUp == true) {
-          messenger.showSnackBar(
-            SnackBar(
-                elevation: 0,
-                backgroundColor: Colors.transparent,
-                content: ErrorNotifier(message: 'Sign up succesful')),
-          );
-          router.go(SignInView.path);
-        }
-        return;
-      } catch (e) {
-        messenger.showSnackBar(
-          SnackBar(
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              content: ErrorNotifier(
-                  message: state.errorMessage ?? 'Somethin went wrong')),
-        );
-      }
+      await state.signUp(
+          email: _emailController.text,
+          password: _passwordController.text,
+          displayName: _displayNameController.text,
+          onSuccess: () {
+            messenger.showSnackBar(
+              SnackBar(
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                  content: SuccessNotifier(message: 'Sign up Successful!')),
+            );
+            router.go(SignInView.path);
+          });
     }
   }
 
@@ -111,11 +102,22 @@ class _SignUpViewState extends State<SignUpView> {
                         context.go(SignInView.path);
                       },
                       child: ProtaskCustomText(fontSize: 17, text: 'Sign In')),
-                  ProtaskIconButton(
-                      icon: Icons.arrow_forward, onPressed: () => _signUp())
+                  state.isLoading == true
+                      ? ProtaskLoader()
+                      : ProtaskIconButton(
+                          icon: Icons.arrow_forward, onPressed: () => _signUp())
                 ],
               ),
-              if (state.isLoading == true) ProtaskLoader(),
+              //if (state.isLoading == true) ProtaskLoader(),
+              if (state.errorMessage != null) ...[
+                const SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  state.errorMessage!,
+                  style: TextStyle(color: Colors.red),
+                )
+              ]
             ],
           ),
         ),

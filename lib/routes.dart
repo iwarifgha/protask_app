@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:task_app/task_app/features/authentication/view/email_verification.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_up.dart';
 import 'package:task_app/task_app/features/authentication/view/splash.dart';
@@ -7,7 +6,8 @@ import 'package:task_app/task_app/features/authentication/view/welcome.dart';
 import 'package:task_app/task_app/features/profile/view/profile_overview.dart';
 import 'package:task_app/task_app/features/profile/view/profile_settings.dart';
 import 'package:task_app/task_app/features/projects/model/project/projects_model.dart';
-import 'package:task_app/task_app/features/projects/view/project_details_screen.dart';
+import 'package:task_app/task_app/features/projects/view/project_details.dart';
+import 'package:task_app/task_app/features/tasks/view/tasks_view.dart';
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
 import 'package:task_app/task_app/features/tasks/model/task/task_model.dart';
 import 'package:task_app/task_app/features/tasks/view/task_details.dart';
@@ -23,8 +23,10 @@ final GoRouter appRoutes = GoRouter(
         path: MyProjectsView.path,
         builder: (context, state) => MyProjectsView()),
     GoRoute(
-        path: EmailVerificationView.path,
-        builder: (context, state) => EmailVerificationView()),
+        path: ProjectDetailsView.path,
+        builder: (context, state) => ProjectDetailsView(
+              project: state.extra as Project,
+            )),
     GoRoute(
         path: ProfileOverview.path,
         builder: (context, state) => ProfileOverview()),
@@ -32,8 +34,8 @@ final GoRouter appRoutes = GoRouter(
         path: ProfileSettingsView.path,
         builder: (context, state) => ProfileSettingsView()),
     GoRoute(
-        path: ProjectDetailsView.path,
-        builder: (context, state) => ProjectDetailsView(
+        path: TasksView.path,
+        builder: (context, state) => TasksView(
               project: state.extra as Project,
             )),
     GoRoute(

@@ -8,13 +8,15 @@ import 'package:task_app/task_app/features/authentication/view/sign_up.dart';
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
 import 'package:task_app/task_app/services/data/pref/user_pref.dart';
 import 'package:task_app/task_app/utils/functions/validators.dart';
-import 'package:task_app/task_app/utils/widgets/email_verify_dialog.dart';
-import 'package:task_app/task_app/utils/widgets/forgot_password_dialog.dart';
-import 'package:task_app/task_app/utils/widgets/protask_icon_button.dart';
-import 'package:task_app/task_app/utils/widgets/error_notifier.dart';
-import 'package:task_app/task_app/utils/widgets/loading_widget.dart';
-import 'package:task_app/task_app/utils/widgets/protask_text.dart';
-import 'package:task_app/task_app/utils/widgets/protask_text_field.dart';
+import 'package:task_app/task_app/utils/widgets/notifiers/error_notifier.dart';
+import 'package:task_app/task_app/utils/widgets/components/loaders/loading_widget.dart';
+import 'package:task_app/task_app/utils/widgets/notifiers/success_notifier.dart';
+
+import '../../../utils/widgets/components/buttons/protask_icon_button.dart';
+import '../../../utils/widgets/components/dialogs/email_verify_dialog.dart';
+import '../../../utils/widgets/components/dialogs/forgot_password_dialog.dart';
+import '../../../utils/widgets/components/text/protask_text.dart';
+import '../../../utils/widgets/components/text/protask_text_field.dart';
 
 class SignInView extends StatefulWidget {
   static String path = '/sign_in';
@@ -62,7 +64,7 @@ class _SignInViewState extends State<SignInView> {
         });
   }
 
-  _login() async {
+  _signIn() async {
     final state = context.read<AuthStateProvider>();
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
@@ -74,17 +76,9 @@ class _SignInViewState extends State<SignInView> {
             content: ErrorNotifier(message: 'Empty fields')),
       );
       return;
-    } else if (state.errorMessage != null) {
-      messenger.showSnackBar(
-        SnackBar(
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            content: ErrorNotifier(message: state.errorMessage!)),
-      );
-      return;
     } else {
       final user = await state.signIn(
-          email: _emailController.text, password: _passwordController.text);
+          email: _emailController.text.trim(), password: _passwordController.text.trim());
 
       if (user != null) {
         final verified = user.isEmailVerified;
@@ -94,7 +88,14 @@ class _SignInViewState extends State<SignInView> {
         } else {
           pref.setUserId(user.userId);
           pref.setSignedInState(true);
+          messenger.showSnackBar(
+            SnackBar(
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                content: SuccessNotifier(message: 'Sign in Successful!')),
+          );
           router.go(MyProjectsView.path);
+
         }
       }
       return;
@@ -138,8 +139,9 @@ class _SignInViewState extends State<SignInView> {
                   ProtaskTextField(
                     label: 'Password',
                     controller: _passwordController,
+                    hideText: true,
                     validator: (pass) {
-                      pass = _passwordController.text;
+                      pass = _passwordController.text.trim();
                       return passwordValidator(pass);
                     },
                   ),
@@ -163,12 +165,21 @@ class _SignInViewState extends State<SignInView> {
                         context.go(SignUpView.path);
                       },
                       child: ProtaskCustomText(fontSize: 17, text: 'Sign Up')),
-                  ProtaskIconButton(
-                      icon: Icons.arrow_forward, onPressed: () => _login())
+                  state.isLoading == true
+                      ? ProtaskLoader()
+                      : ProtaskIconButton(
+                      icon: Icons.arrow_forward, onPressed: () => _signIn())
                 ],
               ),
-              if (state.isLoading == true) ProtaskLoader(),
-            ],
+              if (state.errorMessage != null) ...[
+                const SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  state.errorMessage!,
+                  style: TextStyle(color: Colors.red),
+                )
+              ]            ],
           ),
         ),
       ),

@@ -48,7 +48,7 @@ class _RecordingWaveWidgetState extends State<ProtaskLoader> {
             height: MediaQuery.sizeOf(context).height * height,
             //margin: const EdgeInsets.only(right: 10),
             decoration: BoxDecoration(
-              color: appColor.secondary,
+              color: const Color(0xff008fff),
               borderRadius: BorderRadius.circular(50),
             ),
           );

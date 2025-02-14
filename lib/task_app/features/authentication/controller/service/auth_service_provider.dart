@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:task_app/task_app/features/profile/controller/services/user_profile_service.dart';
 import 'package:task_app/task_app/features/profile/model/user_model.dart';
-import 'package:task_app/task_app/utils/exceptions/exception_handler.dart';
+import 'package:task_app/task_app/utils/exceptions/exception_catcher.dart';
 import 'package:task_app/task_app/utils/exceptions/exceptions.dart';
 
 import '../../../../services/api/firebase/auth/firebase_auth_service.dart';
@@ -20,13 +20,13 @@ class TaskAppAuthServiceProvider {
   // }
 
   User getCurrentUser() {
-    return handleExceptionSync(() {
+    return exceptionCatcher(() {
       return firebaseAuthProvider.getUser();
     });
   }
 
   Future<User> getAuthState() async {
-    return handleExceptionSync(() async {
+    return exceptionCatcher(() async {
       final status = await firebaseAuthProvider.getAuthState();
       if (status == null) {
         throw UserNotFoundException();
@@ -37,7 +37,7 @@ class TaskAppAuthServiceProvider {
 
   Future<UserProfile> signIn(
       {required String email, required String password}) async {
-    return handleExceptionSync(() async {
+    return exceptionCatcher(() async {
       return await firebaseAuthProvider.signIn(
           email: email, password: password);
     });
@@ -47,7 +47,7 @@ class TaskAppAuthServiceProvider {
       {required String email,
       required String password,
       required String displayName}) async {
-    return handleExceptionSync(() async {
+    return exceptionCatcher(() async {
       await firebaseAuthProvider.signUp(
           email: email, password: password, displayName: displayName);
     });
@@ -55,7 +55,7 @@ class TaskAppAuthServiceProvider {
 
   //VERIFY EMAIL
   Future<void> verifyEmail() async {
-    return handleExceptionSync(() async {
+    return exceptionCatcher(() async {
       final user = getCurrentUser();
       await firebaseAuthProvider.verifyEmail(user: user);
     });
@@ -63,7 +63,7 @@ class TaskAppAuthServiceProvider {
 
   //FORGOT PASS
   Future<void> forgotPassword({required String email}) async {
-    return handleExceptionSync(() async {
+    return exceptionCatcher(() async {
       await firebaseAuthProvider.forgotPassword(email: email);
     });
   }
@@ -79,7 +79,7 @@ class TaskAppAuthServiceProvider {
   // }
 
   Future<bool> signOut() async {
-    return handleExceptionSync(() async {
+    return exceptionCatcher(() async {
       return await firebaseAuthProvider.signOut();
     });
   }

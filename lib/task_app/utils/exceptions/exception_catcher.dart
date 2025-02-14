@@ -1,4 +1,4 @@
-// exception_handler.dart
+// exception_catcher.dart
 
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,7 +25,7 @@ import 'package:task_app/task_app/utils/exceptions/exceptions.dart';
 // }
 
 // For sync functions
-T handleExceptionSync<T>(T Function() action) {
+T exceptionCatcher<T>(T Function() action) {
   try {
     return action();
   } on SocketException {
@@ -35,11 +35,13 @@ T handleExceptionSync<T>(T Function() action) {
   } on FormatException {
     throw BadResponseException();
   } on FirebaseAuthException catch(e) {
-    throw FirebaseErrorException(message: 'Error here ${e.toString()}');
+    throw FirebaseErrorException(message: e.message ?? 'Some internal error occurred, please restart your app');
   } on FirebaseException catch (e) {
     throw FirebaseErrorException(
-        message: 'An unexpected error occurred, see here ${e.toString()}');
+        message: 'An error occurred, see why ${e.message}');
   } catch (e) {
     throw GeneralErrorException(message: 'An unexpected error occurred ${e.toString}');
   }
 }
+
+

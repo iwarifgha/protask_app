@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:task_app/task_app/features/projects/controller/state/projects_state_provider.dart';
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
 import 'package:task_app/task_app/features/tasks/controllers/state/task_state_provider.dart';
 import 'package:task_app/task_app/features/tasks/model/task/task_model.dart';
@@ -8,29 +9,27 @@ import 'package:task_app/task_app/utils/functions/date_formatter.dart';
 
 import '../../../utils/widgets/components/text/protask_text.dart';
 import '../../../utils/widgets/components/utility/task_detail_widget.dart';
+import '../model/project/projects_model.dart';
 
-class TaskDetailsView extends StatefulWidget {
-  static const path = '/task_details';
-  final Task task;
+class ProjectDetailsView extends StatefulWidget {
+  static const path = '/project_details';
+  final Project project;
 
-  const TaskDetailsView({super.key, required this.task});
+  const ProjectDetailsView({super.key, required this.project});
 
   @override
-  State<TaskDetailsView> createState() => _TaskDetailsViewState();
+  State<ProjectDetailsView> createState() => _ProjectDetailsViewState();
 }
 
-class _TaskDetailsViewState extends State<TaskDetailsView> {
+class _ProjectDetailsViewState extends State<ProjectDetailsView> {
   late final TextEditingController _titleController;
-  late final TextEditingController _descriptionController;
-  DateTime? _startDate;
-  DateTime? _endDate;
+  late final TextEditingController _goalController;
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.task.title);
-    _descriptionController =
-        TextEditingController(text: widget.task.description);
+    _titleController = TextEditingController(text: widget.project.title);
+    _goalController = TextEditingController(text: widget.project.goal);
   }
 
   _showMenu() {
@@ -52,10 +51,9 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
               padding: EdgeInsets.only(left: 25),
               child: Text('Delete'),
               onTap: () {
-                context.read<TaskStateProvider>().deleteTask(
-                    projectId: widget.task.projectId,
-                    taskId: widget.task.taskId);
-                context.pop();
+                context
+                    .read<ProjectsStateProvider>()
+                    .deleteProject(widget.project.projectId);
               })
         ]);
   }
@@ -70,8 +68,8 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
 
   @override
   Widget build(BuildContext context) {
-    final task = widget.task;
-    final state = context.watch<TaskStateProvider>();
+    final project = widget.project;
+    final state = context.watch<ProjectsStateProvider>();
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -81,7 +79,7 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
             },
           ),
           title: ProtaskCustomText(
-              fontSize: 18, fontWeight: FontWeight.w100, text: 'Task Overview'),
+              fontSize: 18, fontWeight: FontWeight.w100, text: 'Project Overview'),
           actions: [
             IconButton(
               icon: state.isLoading
@@ -93,11 +91,10 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
                 state.isLoading == true
                     ? null
                     : state.isEditing == true
-                        ? state.editTask(
-                            taskId: task.taskId,
-                            projectId: task.projectId,
+                        ? state.editProject(
+                            projectId: project.projectId,
                             title: _titleController.text,
-                            description: _descriptionController.text)
+                            goal: _goalController.text)
                         : _showMenu();
               },
             )
@@ -106,7 +103,7 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
         ),
         backgroundColor: Colors.white,
         body: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(12.0),
           child: SingleChildScrollView(
             child: SizedBox(
               child: Column(
@@ -117,57 +114,44 @@ class _TaskDetailsViewState extends State<TaskDetailsView> {
                     icon: Icons.title_outlined,
                     isEditing: state.isEditing,
                     controller: _titleController,
-                    fontSize: 26,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                     onDoubleTap: () => state.setEditingStatus(true),
                   ),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 15,
                     children: [
                       Icon(Icons.timelapse),
-                      Flexible(
-                        child: ProtaskCustomText(
-                            fontSize: 18,
-                            fontWeight: FontWeight.normal,
-                            text:
-                                'Starting on:  ${formatDate(DateTime.parse(task.startDate))} '),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    spacing: 15,
-                    children: [
-                      Icon(Icons.timelapse),
-                      Flexible(
-                        child: ProtaskCustomText(
-                            fontSize: 18,
-                            fontWeight: FontWeight.normal,
-                            text:
-                                'Will end on:  ${formatDate(DateTime.parse(task.endDate))} '),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    spacing: 15,
-                    children: [
-                      Icon(Icons.done_outline),
-                      Flexible(
-                        child: ProtaskCustomText(
-                            fontSize: 18,
-                            fontWeight: FontWeight.normal,
-                            text:
-                                'Status:  ${task.isCompleted ? 'Done' : 'Pending'} '),
-                      ),
+                      ProtaskCustomText(
+                          fontSize: 18,
+                          fontWeight: FontWeight.normal,
+                          text:
+                          'Duration:  ${widget.project.duration} days '),
                     ],
                   ),
                   TaskDetailWidget(
                     icon: Icons.description_outlined,
                     isEditing: state.isEditing,
-                    controller: _descriptionController,
+                    controller: _goalController,
                     fontSize: 18,
                     fontWeight: FontWeight.normal,
                     onDoubleTap: () {},
                   ),
+
+                  // Row(
+                  //   spacing: 15,
+                  //   children: [
+                  //     Icon(Icons.done_outline),
+                  //     Flexible(
+                  //       child: ProtaskCustomText(
+                  //           fontSize: 18,
+                  //           fontWeight: FontWeight.normal,
+                  //           text:
+                  //               'Status:  ${project.isCompleted ? 'Done' : 'Pending'} '),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
-import 'package:task_app/task_app/utils/widgets/protask_text.dart';
+
+import '../../../utils/widgets/components/text/protask_text.dart';
 
 class ProfileSettingsView extends StatelessWidget {
   static const path = '/profile_settings';

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:task_app/task_app/features/tasks/model/task/task_model.dart';
 import 'package:task_app/task_app/services/api/firebase/firestore/firestore_database_service.dart';
-import 'package:task_app/task_app/utils/exceptions/exception_handler.dart';
+import 'package:task_app/task_app/utils/exceptions/exception_catcher.dart';
 import 'package:uuid/uuid.dart';
 
 class TaskServiceProvider {
@@ -16,7 +16,7 @@ class TaskServiceProvider {
     required String taskId,
     required String projectId,
   }) async {
-    return handleExceptionSync(() async {
+    return exceptionCatcher(() async {
       final task = Task(
           projectId: projectId,
           taskId: taskId,
@@ -32,7 +32,7 @@ class TaskServiceProvider {
   }
 
   Future<List<Task>> fetchTasks(String projectId) async {
-    return handleExceptionSync(() async {
+    return exceptionCatcher(() async {
       final tasks =
           await _fireStoreDatabaseServiceProvider.fetchTasks(projectId);
       return tasks;
@@ -43,7 +43,7 @@ class TaskServiceProvider {
     required String taskId,
     required String projectId,
   }) async {
-    return handleExceptionSync(() async {
+    return exceptionCatcher(() async {
       await _fireStoreDatabaseServiceProvider.deleteTask(
         projectId: projectId,
         taskId: taskId,
@@ -57,7 +57,7 @@ class TaskServiceProvider {
       String? title,
       String? description,
       bool? isCompleted}) async {
-    return handleExceptionSync(() async {
+    return exceptionCatcher(() async {
       return await _fireStoreDatabaseServiceProvider.editTask(
           projectId: projectId,
           taskId: taskId,
@@ -67,26 +67,11 @@ class TaskServiceProvider {
     });
   }
 
-  Future<Task> markAsComplete({required Task task}) async {
-    return handleExceptionSync(() async {
-      return await _fireStoreDatabaseServiceProvider.markTaskComplete(
+  Future<Task> toggleTaskStatus({required Task task}) async {
+    return exceptionCatcher(() async {
+      return await _fireStoreDatabaseServiceProvider.toggleTaskStatus(
           taskId: task.taskId, projectId: task.projectId);
     });
   }
 
-  Future<int> autoCalculateDurationFromTaskDates(
-      {required String projectId}) async {
-    return handleExceptionSync(() async {
-      return await _fireStoreDatabaseServiceProvider
-          .calculateProjectDuration(projectId);
-    });
-  }
-
-  Future<bool> checkForAllTaskInProjectComplete(
-      {required String projectId}) async {
-    return handleExceptionSync(() async {
-      return await _fireStoreDatabaseServiceProvider
-          .checkIfAllTasksInAProjectComplete(projectId: projectId);
-    });
-  }
 }

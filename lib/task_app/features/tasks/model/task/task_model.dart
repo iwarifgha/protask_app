@@ -54,4 +54,17 @@ class Task extends TaskModel {
         endDate: map['endDate'],
         isCompleted: map['isCompleted'] ?? false);
   }
+
+  Task copyWith({bool? isCompleted,String? description, String? startDate, String? endDate}) {
+    return Task(
+      taskId: taskId,
+      title: title,
+      description: description ?? this.description,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      isCompleted: isCompleted ?? this.isCompleted,
+      projectId: projectId,
+      timeCreated: timeCreated,
+    );
+  }
 }

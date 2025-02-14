@@ -3,20 +3,32 @@ import 'package:task_app/task_app/features/profile/controller/services/user_prof
 import 'package:task_app/task_app/features/profile/model/user_model.dart';
 import 'package:task_app/task_app/utils/functions/error_handler.dart';
 
+import '../../../../services/data/pref/user_pref.dart';
+
 class UserProfileState extends ChangeNotifier {
+
+  UserProfileState(){
+    getProfile();
+  }
   final _userProfileServiceProvider = UserProfileService();
+  final pref = UserPreferences();
+
+
+  UserProfile? _userProfile;
+  UserProfile? get userProfile => _userProfile;
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  Future<UserProfile?> getProfile({required String userId}) async {
+  Future<void> getProfile() async {
     try {
-      final user = await _userProfileServiceProvider.getProfile(userId: userId);
-      return user;
+      final id =  await pref.getUserId();
+      final user = await _userProfileServiceProvider.getProfile(userId: id);
+      _userProfile = user;
     } catch (e) {
       final errorMsg = handleError(e);
       _errorMessage = errorMsg;
-      return null;
+      _userProfile = null;
     } finally {
       notifyListeners();
     }

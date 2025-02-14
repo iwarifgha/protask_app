@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:task_app/task_app/utils/widgets/protask_text.dart';
+
+import '../text/protask_text.dart';
 
 class ProtaskIconTextButton extends StatelessWidget {
-  final IconData icon;
+  final Widget icon;
   final String text;
   final VoidCallback onPressed;
 
@@ -17,13 +18,11 @@ class ProtaskIconTextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(Colors.black),
+          backgroundColor: WidgetStateProperty.all(const Color(0xff008fff)),
           iconColor: WidgetStateProperty.all(Colors.white),
           textStyle: WidgetStatePropertyAll(TextStyle(color: Colors.white))),
       onPressed: onPressed,
-      icon: Icon(
-        icon,
-      ),
+      icon: icon,
       label: ProtaskCustomText(text: text, color: Colors.white),
     );
   }

@@ -7,9 +7,11 @@ class AuthStateProvider extends ChangeNotifier {
   final _authServiceProvider = TaskAppAuthServiceProvider();
 
   bool _isLoading = false;
+
   bool get isLoading => _isLoading;
 
   String? _errorMessage;
+
   String? get errorMessage => _errorMessage;
 
   _setLoading(bool value) {
@@ -40,37 +42,39 @@ class AuthStateProvider extends ChangeNotifier {
 
   Future<UserProfile?> signIn(
       {required String email, required String password}) async {
-    clearError();
     _setLoading(true);
+    clearError();
     try {
       await Future.delayed(Duration(milliseconds: 500));
       return await _authServiceProvider.signIn(
           email: email, password: password);
     } catch (e) {
-      //final errorMessage = handleError(e);
-      _errorMessage = e.toString();
-      notifyListeners();
+      final errorMessage = handleError(e);
+      _errorMessage = errorMessage;
+
       return null;
     } finally {
       _setLoading(false);
     }
   }
 
-  Future<bool> signUp(
+  Future<void> signUp(
       {required String email,
       required String displayName,
-      required String password}) async {
-    clearError();
+      required String password,
+      required Function onSuccess}) async {
     _setLoading(true);
+    clearError();
+
     try {
       await Future.delayed(Duration(milliseconds: 500));
       await _authServiceProvider.signUp(
           email: email, password: password, displayName: displayName);
-      return true;
+      onSuccess();
     } catch (e) {
-      //final errorMessage = handleError(e);
-      _errorMessage = e.toString();
-      return false;
+       final errorMessage = handleError(e);
+      _errorMessage = errorMessage;
+
     } finally {
       _setLoading(false);
     }
@@ -99,19 +103,11 @@ class AuthStateProvider extends ChangeNotifier {
     }
   }
 
-  // Future<void> confirmPassword(
-  //     {required String code, required String newPassword}) async {
-  //   try {
-  //     await _authServiceProvider.confirmPassword(
-  //         code: code, newPassword: newPassword);
-  //   } catch (e) {
-  //     throw Exception();
-  //   }
-  // }
 
   Future<bool> signOut() async {
     _setLoading(true);
     try {
+      await Future.delayed(Duration(milliseconds: 1000));
       return await _authServiceProvider.signOut();
     } catch (e) {
       final errorMessage = handleError(e);

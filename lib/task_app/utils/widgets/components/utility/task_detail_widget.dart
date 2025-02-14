@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:task_app/task_app/utils/widgets/protask_text.dart';
+
+import '../text/protask_text.dart';
 
 class TaskDetailWidget extends StatelessWidget {
   final IconData icon;

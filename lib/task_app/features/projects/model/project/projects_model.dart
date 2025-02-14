@@ -53,4 +53,17 @@ class Project extends ProjectsModel {
         timeCreated: json['createdAt'] ?? '',
         allTasksCompleted: json['allTasksCompleted'] ?? false);
   }
+
+  Project copyWith(
+      {bool? allTasksCompleted, int? duration, String? goal, String? title}) {
+    return Project(
+      title: title ?? this.title,
+      duration: duration ?? this.duration,
+      goal: goal ?? this.goal,
+      allTasksCompleted: allTasksCompleted ?? this.allTasksCompleted,
+      projectId: projectId,
+      timeCreated: timeCreated,
+      userId: userId,
+    );
+  }
 }

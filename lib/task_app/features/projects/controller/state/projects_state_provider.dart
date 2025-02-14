@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:task_app/task_app/features/projects/controller/services/projects_service_provider.dart';
 import 'package:task_app/task_app/features/projects/model/project/projects_model.dart';
 import 'package:task_app/task_app/services/data/pref/user_pref.dart';
+import 'package:task_app/task_app/utils/exceptions/exceptions.dart';
 import 'package:task_app/task_app/utils/functions/error_handler.dart';
 import 'package:uuid/uuid.dart';
 
@@ -10,18 +13,75 @@ class ProjectsStateProvider with ChangeNotifier {
   var uuid = Uuid();
   final pref = UserPreferences();
 
+  ProjectsStateProvider() {
+    _listenForProjects();
+  }
+
   List<Project> _projects = [];
+
   List<Project> get projects => _projects;
   final _projectServiceProvider = ProjectsServiceProvider();
 
   bool _isLoading = false;
+
   bool get isLoading => _isLoading;
 
   String? _errorMessage;
+
   String? get errorMessage => _errorMessage;
+
+  bool _isEditing = false;
+
+  bool get isEditing => _isEditing;
+
+  double scrollOffset = 0.0;
+  int highlightedProjectIndex = 0;
+
+  StreamSubscription<List<Project>>? _projectsSubcription;
+
+  _listenForProjects() async {
+    final userId = await pref.getUserId();
+    _projectsSubcription = _projectServiceProvider
+        .getProjectsStream(userId)
+        .listen((projectsFromStream) {
+      _projects = projectsFromStream;
+      _projects.sort((a, b) {
+        if (a.allTasksCompleted && !b.allTasksCompleted) return -1;
+        if (!a.allTasksCompleted && b.allTasksCompleted) return 1;
+        return 0; // Keep order the same otherwise
+      });
+      _clearError();
+    },
+        onError: (error) {
+          _errorMessage = 'Error fetching projects: $error';
+          notifyListeners();
+        }
+    );
+  }
+
+  updateScroll({required double offset, required int index}) {
+    scrollOffset = offset;
+    highlightedProjectIndex = index;
+    notifyListeners();
+  }
+
+  setEditingStatus(bool value) {
+    _isEditing = value;
+    notifyListeners();
+  }
 
   _setLoading(bool value) {
     _isLoading = value;
+    notifyListeners();
+  }
+
+  _setHighlightedIndex() {
+    highlightedProjectIndex = 0;
+    notifyListeners();
+  }
+
+  void _clearError() {
+    _errorMessage = null;
     notifyListeners();
   }
 
@@ -31,6 +91,7 @@ class ProjectsStateProvider with ChangeNotifier {
       required String timeCreated}) async {
     try {
       _setLoading(true);
+      _clearError();
       final userId = await pref.getUserId();
       final project = Project(
           projectId: uuid.v4(),
@@ -40,82 +101,96 @@ class ProjectsStateProvider with ChangeNotifier {
           duration: 0,
           allTasksCompleted: false,
           timeCreated: timeCreated);
-      final newProject =
-          await _projectServiceProvider.addProject(project: project);
-      _projects.add(newProject);
-      _errorMessage = null;
-      notifyListeners();
+      await Future.delayed(Duration(milliseconds: 500), () async {
+        final newProject =
+            await _projectServiceProvider.addProject(project: project);
+        _projects.add(newProject);
+      });
     } catch (e) {
       final errorMsg = handleError(e);
       _errorMessage = errorMsg;
     } finally {
-      notifyListeners();
+      _setLoading(false);
     }
   }
 
   Future<void> fetchProjects() async {
+    _setLoading(true);
+    _clearError();
+    _setHighlightedIndex();
     try {
+      await Future.delayed(Duration(milliseconds: 500));
       _projects = await _projectServiceProvider.fetchProjects();
-      _errorMessage = null;
       notifyListeners();
     } catch (e) {
       final errorMsg = handleError(e);
       _errorMessage = errorMsg;
-      notifyListeners();
     } finally {
-      notifyListeners();
+      _setLoading(false);
     }
   }
 
   Future<void> deleteProject(String projectId) async {
+    _setLoading(true);
+    _clearError();
     try {
+      await Future.delayed(Duration(milliseconds: 1000));
       await _projectServiceProvider.deleteProject(projectId);
       _projects.removeWhere((project) => project.projectId == projectId);
-      _errorMessage = null;
-      notifyListeners();
     } catch (e) {
       final errorMsg = handleError(e);
       _errorMessage = errorMsg;
     } finally {
-      notifyListeners();
+      _setLoading(false);
     }
   }
 
   Future<void> editProject(
       {required String projectId,
       String? title,
-      int? duration,
-      bool? completed}) async {
+      String? goal,
+      bool? completed,
+      int? duration}) async {
+    _setLoading(true);
+    _clearError();
     try {
       final projectIndex =
           _projects.indexWhere((project) => project.projectId == projectId);
       if (projectIndex == -1) return;
-
+      await Future.delayed(Duration(milliseconds: 1000));
       final newProject = await _projectServiceProvider.editProject(
           projectId: projectId,
+          duration: duration,
           title: title,
-          duration: duration?.toInt(),
+          goal: goal,
           completed: completed);
       _projects[projectIndex] = newProject;
-      _errorMessage = null;
-      notifyListeners();
+      setEditingStatus(false);
     } catch (e) {
       final errorMsg = handleError(e);
       _errorMessage = errorMsg;
     } finally {
-      notifyListeners();
+      _setLoading(false);
     }
+  }
+
+
+
+  @override
+  void dispose() {
+    _projectsSubcription?.cancel();
+    super.dispose();
   }
 
   Future<void> markProjectAsComplete({
     required String projectId,
   }) async {
-    //Check if the task is in the local list
+    _clearError(); //Check if the task is in the local list
     try {
       final projectIndex = _projects
           .indexWhere((projectVal) => projectVal.projectId == projectId);
       if (projectIndex == -1) {
-        throw Exception();
+        throw GeneralErrorException(message: 'No project found');
       }
 
       //get the specific project
@@ -124,14 +199,25 @@ class ProjectsStateProvider with ChangeNotifier {
       final completedProject =
           await _projectServiceProvider.markAsCompleteProject(project: project);
       //re-assign the project now with completed value
+      print ('check if project is truly completed: ${completedProject.allTasksCompleted}');
       project = completedProject;
+      print ('check if project is truly completed: ${project.allTasksCompleted}');
+
     } catch (e) {
-      throw Exception();
+      final errorMsg = handleError(e);
+      _errorMessage = errorMsg;
+    } finally {
+      _setLoading(false);
     }
   }
 
-  void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+  bool checkIfProjectComplete(String projectId){
+    final projectIndex = _projects.indexWhere((project) => project.projectId == projectId);
+    final project = _projects[projectIndex];
+
+    if (project.allTasksCompleted == true){
+      return true;
+    }
+    return false;
   }
 }

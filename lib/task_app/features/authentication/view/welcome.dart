@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/authentication/controller/state/auth_state_provider.dart';
 import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
 import 'package:task_app/task_app/services/data/pref/user_pref.dart';
-import 'package:task_app/task_app/utils/widgets/protask_main_button.dart';
+
+import '../../../utils/widgets/components/buttons/protask_main_button.dart';
 
 class WelcomeView extends StatelessWidget {
   static const path = '/welcome';

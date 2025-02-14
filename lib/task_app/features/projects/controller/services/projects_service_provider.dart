@@ -2,6 +2,7 @@ import 'package:task_app/task_app/features/projects/model/project/projects_model
 import 'package:task_app/task_app/services/api/firebase/auth/firebase_auth_service.dart';
 import 'package:task_app/task_app/services/api/firebase/firestore/firestore_database_service.dart';
 import 'package:task_app/task_app/services/data/pref/user_pref.dart';
+import 'package:task_app/task_app/utils/exceptions/exception_catcher.dart';
 import 'package:uuid/uuid.dart';
 
 class ProjectsServiceProvider {
@@ -11,17 +12,15 @@ class ProjectsServiceProvider {
   final _fireStoreDatabaseServiceProvider = FirestoreDatabase();
 
   Future<Project> addProject({required Project project}) async {
-    try {
+    return exceptionCatcher(() async {
       final newProject =
           await _fireStoreDatabaseServiceProvider.addProject(project: project);
       return newProject;
-    } catch (e) {
-      throw Exception(e);
-    }
+    });
   }
 
   Future<List<Project>> fetchProjects() async {
-    try {
+    return exceptionCatcher(() async {
       final user = await _firebaseAuthProvider.getAuthState();
       if (user == null) {
         throw Exception('User not logged in');
@@ -29,42 +28,42 @@ class ProjectsServiceProvider {
       final projects =
           await _fireStoreDatabaseServiceProvider.fetchProjects(user.uid);
       return projects;
-    } catch (e) {
-      throw Exception(e);
-    }
+    });
+  }
+
+  Stream<List<Project>> getProjectsStream(String userId) {
+    return exceptionCatcher( (){
+      return _fireStoreDatabaseServiceProvider.getProjectsStream(userId);
+    });
   }
 
   Future<void> deleteProject(String projectId) async {
-    try {
+    return exceptionCatcher(() async {
       await _fireStoreDatabaseServiceProvider.deleteProject(projectId);
-    } catch (e) {
-      throw Exception(e);
-    }
+    });
   }
 
   Future<Project> editProject(
       {required String projectId,
+        int? duration,
       String? title,
-      int? duration,
+      String? goal,
       bool? completed}) async {
-    try {
+    return exceptionCatcher(() async {
       final project = await _fireStoreDatabaseServiceProvider.updateProject(
           projectId: projectId,
+          duration: duration,
           title: title,
-          duration: duration?.toInt(),
+          projectGoal: goal,
           completed: completed);
       return project;
-    } catch (e) {
-      throw Exception(e);
-    }
+    });
   }
 
   Future<Project> markAsCompleteProject({required Project project}) async {
-    try {
+    return exceptionCatcher(() async {
       return await _fireStoreDatabaseServiceProvider.markProjectAsComplete(
           projectId: project.projectId);
-    } catch (e) {
-      throw Exception(e.toString());
-    }
+    });
   }
 }

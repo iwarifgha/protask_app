@@ -6,10 +6,11 @@ import 'package:task_app/task_app/features/authentication/view/sign_in.dart';
 import 'package:task_app/task_app/features/authentication/view/welcome.dart';
 import 'package:task_app/task_app/features/projects/view/projects_view.dart';
 import 'package:task_app/task_app/services/data/pref/user_pref.dart';
-import 'package:task_app/task_app/utils/widgets/loading_widget.dart';
+import 'package:task_app/task_app/utils/widgets/components/loaders/loading_widget.dart';
 
 class SplashView extends StatefulWidget {
   static const path = '/splash';
+
   const SplashView({super.key});
 
   @override
@@ -47,9 +48,14 @@ class _SplashViewState extends State<SplashView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Container(
-      color: Colors.white,
-      child: Center(child: ProtaskLoader()),
-    ));
+      backgroundColor: Colors.white,
+        body: Center(
+          child: Container(
+            height: 100,
+            width: 100,
+            color: Colors.white,
+            child: Image.asset('assets/images/Pro_Hadid-removebg-preview.png'),
+          ),
+        ));
   }
 }

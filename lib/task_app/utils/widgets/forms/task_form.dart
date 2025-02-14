@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_app/task_app/features/tasks/controllers/state/task_state_provider.dart';
-import 'package:task_app/task_app/utils/widgets/protask_icon_text_button.dart';
 import 'package:uuid/uuid.dart';
+
+import '../components/buttons/protask_icon_text_button.dart';
 
 class AddTaskForm extends StatefulWidget {
   final String projectId;
@@ -134,7 +135,7 @@ class _AddTaskFormState extends State<AddTaskForm> {
           ),
           SizedBox(height: 16),
           ProtaskIconTextButton(
-              icon: Icons.bolt,
+              icon: Icon(Icons.bolt),
               text: 'Add task',
               onPressed: () {
                 if (titleController.text.isNotEmpty &&

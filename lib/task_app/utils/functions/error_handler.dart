@@ -8,7 +8,7 @@ String handleError(dynamic error) {
   } else if (error is GeneralErrorException) {
     return error.message;
   } else if (error is FirebaseErrorException) {
-    return error.message;
+    return _handleAuthException(error);
   }
   else if (error is UserNotFoundException) {
     return ' No user found ';
@@ -18,6 +18,19 @@ String handleError(dynamic error) {
    else if (error is BadResponseException) {
     return ' Incorrect input. Please check and try again ';
   } else {
-     return ' Something bad happened, Please restart the app and try again. ';
+     return ' Something bad happened, Please restart the app. ${error.toString()} ';
+  }
+}
+
+String _handleAuthException(FirebaseErrorException e) {
+  switch (e.message) {
+    case 'email-already-in-use':
+      return "This email is already registered. Try logging in.";
+    case 'weak-password':
+      return "Your password is too weak. Try a stronger one.";
+    case 'invalid-email':
+      return "Please enter a valid email.";
+    default:
+      return "Something bad happened. Please try again.";
   }
 }

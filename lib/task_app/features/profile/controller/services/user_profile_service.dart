@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:task_app/task_app/features/profile/model/user_model.dart';
 import 'package:task_app/task_app/services/api/firebase/firestore/firestore_database_service.dart';
+import 'package:task_app/task_app/utils/exceptions/exception_catcher.dart';
 import 'package:task_app/task_app/utils/exceptions/exceptions.dart';
 
 class UserProfileService {
@@ -14,23 +15,10 @@ class UserProfileService {
 
   //Read profile
   Future<UserProfile> getProfile({required String userId}) async {
-    try {
+    return exceptionCatcher(() async {
       final user = await _firestoreProvider.getUserProfile(userId: userId);
       return user;
-    } on SocketException {
-      throw NoInternetException();
-    } on HttpException {
-      throw SomethingWentWrongException();
-    } on FormatException {
-      throw BadResponseException();
-    } on FirebaseAuthException {
-      throw FirebaseErrorException(message: 'No user logged in');
-    } on FirebaseException catch (e) {
-      throw FirebaseErrorException(
-          message: 'An unexpected error occured, see here ${e.toString()}');
-    } catch (e) {
-      throw GeneralErrorException(message: 'An unexpected error occured');
-    }
+    });
   }
 
   //Edit profile
@@ -40,42 +28,16 @@ class UserProfileService {
     String? email,
     String? photoUrl,
   }) async {
-    try {
+    return exceptionCatcher(() async {
       await _firestoreProvider.updateUserDetails(
           uid: uid, displayName: displayName, email: email, photoUrl: photoUrl);
-    } on SocketException {
-      throw NoInternetException();
-    } on HttpException {
-      throw SomethingWentWrongException();
-    } on FormatException {
-      throw BadResponseException();
-    } on FirebaseAuthException {
-      throw FirebaseErrorException(message: 'No user logged in');
-    } on FirebaseException catch (e) {
-      throw FirebaseErrorException(
-          message: 'An unexpected error occured, see here ${e.toString()}');
-    } catch (e) {
-      throw GeneralErrorException(message: 'An unexpected error occured');
-    }
+    });
   }
 
   //Delete profile
   deleteProfile(String userId) async {
-    try {
+    return exceptionCatcher(() async {
       await _firestoreProvider.deleteUserProfile(userId);
-    }on SocketException {
-      throw NoInternetException();
-    } on HttpException {
-      throw SomethingWentWrongException();
-    } on FormatException {
-      throw BadResponseException();
-    } on FirebaseAuthException {
-      throw FirebaseErrorException(message: 'No user logged in');
-    } on FirebaseException catch (e) {
-      throw FirebaseErrorException(
-          message: 'An unexpected error occured, see here ${e.toString()}');
-    } catch (e) {
-      throw GeneralErrorException(message: 'An unexpected error occured');
-    }
+    });
   }
 }
