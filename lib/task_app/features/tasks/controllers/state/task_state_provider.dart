@@ -81,11 +81,6 @@ class TaskStateProvider extends ChangeNotifier {
     try {
       Future.delayed(Duration(milliseconds: 600));
       _tasks = await _taskServiceProvider.fetchTasks(projectId);
-      _tasks.sort((a, b) {
-        if (a.isCompleted && !b.isCompleted) return -1;
-        if (!a.isCompleted && b.isCompleted) return 1;
-        return a.startDate.compareTo(b.startDate);
-      });
     } catch (e) {
       final errorMsg = handleError(e);
       _errorMessage = errorMsg;
@@ -189,29 +184,7 @@ class TaskStateProvider extends ChangeNotifier {
   Future<void> calculateProjectDurationFromTasks(
       {required String projectId, required Function onEmpty}) async {
     try {
-      //Get uncompleted tasks
-      List<Task> incompleteTasks =
-          _tasks.where((task) => task.isCompleted == false).toList();
-      if (incompleteTasks.isEmpty) {
-        // No active tasks, duration is zero
-        await _projectServiceProvider.editProject(
-            projectId: projectId, duration: 0);
-        onEmpty();
-        notifyListeners();
-        return;
-      }
-
-      List<DateTime> startDates = incompleteTasks
-          .map((task) => DateTime.parse(task.startDate))
-          .toList();
-      List<DateTime> endDates =
-          incompleteTasks.map((task) => DateTime.parse(task.endDate)).toList();
-
-      DateTime minStart = startDates.reduce((a, b) => a.isBefore(b) ? a : b);
-      DateTime maxEnd = endDates.reduce((a, b) => a.isAfter(b) ? a : b);
-      final duration = maxEnd.difference(minStart).inDays + 1;
-      await _projectServiceProvider.editProject(
-          projectId: projectId, duration: duration);
+      //Auto-calculation logic here
     } catch (e) {
       final errorMsg = handleError(e);
       _errorMessage = errorMsg;

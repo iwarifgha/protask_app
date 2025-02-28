@@ -20,36 +20,13 @@ class MyProjectsView extends StatefulWidget {
 }
 
 class _MyProjectsViewState extends State<MyProjectsView> {
-  bool loading = false;
-  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.addListener(_onScroll);
-    });
     super.initState();
   }
 
-  void _onScroll() {
-    final provider = context.read<ProjectsStateProvider>();
-    final itemCount = provider.projects.length;
 
-    // Find the index of the post nearest to the top
-    int indexAtTop = (_scrollController.offset / 100).round();
-    // Ensure the last item can still be highlighted
-    indexAtTop = indexAtTop.clamp(0, itemCount - 1);
-    provider.updateScroll(offset: _scrollController.offset, index: indexAtTop);
-  }
-
-  // _showErrorSnackbar(String message) {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //         elevation: 0,
-  //         backgroundColor: Colors.transparent,
-  //         content: ErrorNotifier(message: message)),
-  //   );
-  // }
 
   void _showAddProjectForm() {
     final titleController = TextEditingController();
@@ -129,7 +106,6 @@ class _MyProjectsViewState extends State<MyProjectsView> {
                         style: TextStyle(color: Colors.red),
                       )
                     : ListView.builder(
-                        controller: _scrollController,
                         itemCount: projects.length + 1,
                         //projects.length,
                         itemBuilder: (context, index) {

@@ -45,11 +45,6 @@ class ProjectsStateProvider with ChangeNotifier {
         .getProjectsStream(userId)
         .listen((projectsFromStream) {
       _projects = projectsFromStream;
-      _projects.sort((a, b) {
-        if (a.allTasksCompleted && !b.allTasksCompleted) return -1;
-        if (!a.allTasksCompleted && b.allTasksCompleted) return 1;
-        return 0; // Keep order the same otherwise
-      });
       _clearError();
     },
         onError: (error) {
@@ -59,11 +54,7 @@ class ProjectsStateProvider with ChangeNotifier {
     );
   }
 
-  updateScroll({required double offset, required int index}) {
-    scrollOffset = offset;
-    highlightedProjectIndex = index;
-    notifyListeners();
-  }
+
 
   setEditingStatus(bool value) {
     _isEditing = value;
@@ -72,11 +63,6 @@ class ProjectsStateProvider with ChangeNotifier {
 
   _setLoading(bool value) {
     _isLoading = value;
-    notifyListeners();
-  }
-
-  _setHighlightedIndex() {
-    highlightedProjectIndex = 0;
     notifyListeners();
   }
 
@@ -117,8 +103,7 @@ class ProjectsStateProvider with ChangeNotifier {
   Future<void> fetchProjects() async {
     _setLoading(true);
     _clearError();
-    _setHighlightedIndex();
-    try {
+     try {
       await Future.delayed(Duration(milliseconds: 500));
       _projects = await _projectServiceProvider.fetchProjects();
       notifyListeners();
