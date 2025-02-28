@@ -1,16 +1,24 @@
-# task_app
+# Protask
 
-A new Flutter project.
+A lightweight project manager. This repo is a limited code version for portfolio sake due to the app's 
+intended release.
 
-## Getting Started
+## Features
+✅ Authentication.
+✅ Profile management.
+✅ Create and manage projects.
+✅ Add tasks to your projects.
+✅ Auto-calculation of project duration.
+✅ Tick and Un-tick tasks.
+✅ Auto-completion of projects when all task are complete.
+✅ Intuitive scrolling.
+✅ Edit Task and Project details.
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+## Tech Stack
+✅ Flutter - Frontend
+✅ Firebase - Backend
+✅ Riverpod - State Management
+ 
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
